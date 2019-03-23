@@ -1,0 +1,36 @@
+.chart-tooltip {
+    position: absolute;
+    display: none;
+    background: #fff;
+    
+    &.active {
+        display: block;
+
+        display: grid;
+        grid-template-columns: auto auto;
+        grid-gap: 10px;
+    }
+
+    .chart-tooltip-title {
+        width: 100%;
+        grid-column: 1 / span 2;
+    }
+
+
+    .chart-tooltip-item {
+
+        line-height: 1rem;
+        .chart-tooltip-item-value {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin: 0;
+            padding: 0;
+        }
+        .chart-tooltip-item-name {
+            font-size: .8rem;
+            margin: 0 0 1rem;
+            padding: 0;
+        }
+    }
+}
+

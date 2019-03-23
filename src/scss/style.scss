@@ -1,0 +1,104 @@
+@mixin mq($width, $type: min) {
+    @if map_has_key($breakpoints, $width) {
+        $width: map_get($breakpoints, $width);
+
+        @if $type==max {
+            $width: $width - 1px;
+        }
+
+        @media only screen and (#{$type}-width: $width) {
+            @content;
+        }
+    }
+}
+
+
+$breakpoints: ("phone": 400px,
+"phone-wide": 480px,
+"phablet": 560px,
+"tablet-small": 640px,
+"tablet": 768px,
+"tablet-wide": 1024px,
+"desktop": 1248px,
+"desktop-wide": 1440px,
+"sm": 567px,
+"md": 768px,
+"lg": 992px,
+"xl": 1200px);
+
+$controls-borders: 1px solid #ccc;
+$header-height: 5rem;
+$header-height-mobile: 1rem;
+$chart-controls-height: 2rem;
+
+
+
+body {
+    margin: 0 auto;
+    max-width: 56em;
+    padding: 1em 0;
+    font-family: arial;
+}
+
+.content {
+    display: flex;
+    flex-flow: wrap;
+    margin: 0 1em;
+
+    .chart {
+        width: calc(50% - 2em);
+        margin: 1em;
+        .chart-container {
+            height: 500px;
+        }
+
+        @include mq('tablet', 'max') {
+            flex: 0 0 100%;
+            margin: 1em 0;
+        }
+    }
+}
+
+.night-mode {
+    color: #fff;
+    background-color: #242f3e;
+    .chart-scroll{
+        .chart-scroll-bar {
+            background: #1f2a38;
+        }
+        .chart-scroll-carret {
+            border-color: #40566b;
+        }
+    }
+    .chart-legend-item {
+        border-color: #344658;
+        filter: opacity(80%) brightness(120%);
+        &.hidden {
+            .icon:after {
+                background: #242f3e;
+            }
+        }
+    }
+    canvas {
+        filter: opacity(80%)  brightness(120%);
+    }
+    .hight-mode-trigger {
+        .tonight {
+            display: none;
+        }
+        .today {
+            display: inline;
+        }
+    }
+}
+
+.hight-mode-trigger {
+    .today {
+        display: none;
+    }
+    margin: 100px 0 30px 0;
+    font-size: 1.4rem;
+    line-height: 2rem;
+    text-align: center;
+    color: #108be3;
+}
