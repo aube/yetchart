@@ -7,7 +7,6 @@ const Utils = {
         }
 
         extend = typeof args[args.length - 1] === 'boolean' ? args.pop() : true;
-    // console.log('base', base, objs);
         function _type(v) {
             if (!v) return false;
             let t = Object.getPrototypeOf(v).constructor;
@@ -15,17 +14,12 @@ const Utils = {
         }
         for (let i = 0; i < args.length; i++) {
             let obj = args[i];
-            // if (args.length > 3) {
-            //     console.log('obj',i, base, obj, obj && Object.keys(obj));
-            // }
             if (!obj) {
                 continue;
             }
-            // console.log('Object.keys(obj)');
             if (_type(obj) !== _type(base)) {
                 continue;
             }
-            // throw _type(obj);
             Object.keys(obj).forEach(key => {
                 let type = _type(obj[key]);
                 if (!type) { // String etc.
@@ -40,7 +34,6 @@ const Utils = {
                 }
             });
         };
-        // console.log('base', base);
         return base;
     },
 
@@ -51,10 +44,10 @@ const Utils = {
         return param.indexOf('%') ? parseInt(param) / 100 * value : parseFloat(param);
     },
 
-
     isDef: function(v) {
         return typeof v !== 'undefined';
     },
+
     sumObj: function(base = {}, obj = {}) {
         Object.keys(obj).forEach(key => {
             base[key] = (base[key] || 0) + obj[key];
@@ -125,7 +118,6 @@ const Utils = {
 
         return handle;
     },
-
 
     getEventXY: function(e, el) {
 

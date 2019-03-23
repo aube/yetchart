@@ -51,7 +51,7 @@
             document.body.classList.toggle('night-mode');
 
 
-            let day = {
+            let daySettings = {
                 Graph: {
                     elementsTypes: {
                         Line: {
@@ -80,7 +80,7 @@
                 }
             };
 
-            let night = {
+            let nightSettings = {
                 Graph: {
                     elementsTypes: {
                         Line: {
@@ -110,8 +110,8 @@
 
             };
             toggleNightMode.night = !toggleNightMode.night;
-            activeCharts.forEach(C => {
-                C.options = toggleNightMode.night ? night : day;
+            activeCharts.forEach(Chart => {
+                Chart.options = toggleNightMode.night ? nightSettings : daySettings;
             })
         }
 
@@ -190,7 +190,6 @@
                 let name = column.shift();
                 if (name === 'x') {
                     converted.labels = column;
-                    converted.labelsFormat = ts2date;
                     return;
                 }
                 // column = column.map(c => Math.random().toFixed(2) * 1); // test

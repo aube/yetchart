@@ -6,31 +6,19 @@ import { Graph } from './component.graph.js';
 import { Map } from './component.map.js';
 import { Scroll } from './component.scroll.js';
 import { Legend } from './component.legend.js';
-// import { Tooltip } from './component.tooltip.js';
-
-
 
 const components = {Graph, Map, Scroll, Legend};
 
 
-function copyJSON(obj) {
-    return JSON.parse(JSON.stringify(obj));
-};
-
-
 export default class Chart {
 
-    constructor(options = {}, preset = 'default') {
+    constructor(options, preset) {
         this.components = [];
 
-        const defOpt = copyJSON(Presets[preset] || Presets.default);
+        const defOpt = Presets[preset] || Presets.default;
 
-        this._options = Utils.objMerge(defOpt, options, true);
-        // this.options = {
-        //     Graph: Object.assign({}, Graph, (options.Graph || {})),
-        //     Map: Object.assign({}, Map, (options.Map || {})),
-        // };
-        // console.log('this._options', this._options);
+        this._options = Utils.objMerge({}, defOpt, options, true);
+        
         this.setContainer(options && options.element);
         this.createComponents();
         this.callComponents(['resize']);

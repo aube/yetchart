@@ -11,7 +11,6 @@ export class Graph extends abstractComponent {
             datasets: []
         };
 
-
         let _e = (e, el) => {
             e = Utils.getEventXY(e, this.component);
             return {x: e.x / this.width, y: e.y / this.height};
@@ -157,6 +156,7 @@ export class Graph extends abstractComponent {
         title = this.data.labels[activePoint];
 
         this.data.datasets.forEach(ds => {
+            if (ds.hidden) return;
             content.push({
                 name: ds.options.name,
                 color: ds.options.color,
@@ -174,11 +174,8 @@ export class Graph extends abstractComponent {
         this.prepareData();
 
         if (this.data.pointWidthRate !== 1) {
-            // this.render();
             if (!this._aniXStop) {
-            // console.log('this._aniXStop', this._aniXStop);
                 this.renderAniX();
-                // Utils.throttle(this.renderAniX, 10, this, 100);
             }
         } else {
             if (!this._aniXStop) {
@@ -189,7 +186,6 @@ export class Graph extends abstractComponent {
             if (!this._aniYStop) {
                 this.renderAniY();
             }
-                // Utils.throttle(this.renderAniY, 10, this, 200);
         }
     }
 
@@ -197,7 +193,6 @@ export class Graph extends abstractComponent {
         this.prepareData();
         this.renderAniY();
     }
-
 
     onSetActivePoint() {
         let currentState = this.getCurrentState();

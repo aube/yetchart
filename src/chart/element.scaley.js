@@ -36,20 +36,7 @@ export class ScaleY extends abstractElement {
             ctx.fillText(isNaN(txt) ? '' : txt, this.left, _posY(labelsAmount - i));
         }
 
-
         ctx.stroke();
-
-
-        // let x = this.width - 10;
-        // let y = 1;
-        // ctx.textAlign = 'right';
-        // ctx.font = '32px arial';
-        // ctx.fillText('cellHeidht: ' + cellHeidht, x, y++ * 30 + 100);
-        // ctx.fillText('step: ' + step, x, y++ * 30 + 100);
-        // ctx.fillText('this.min: ' + this.min, x, y++ * 30 + 100);
-        // ctx.fillText('this.max: ' + this.max, x, y++ * 30 + 100);
-
-
     }
 }
 

@@ -63,25 +63,23 @@ export class Scroll extends abstractComponent {
         });
     }
 
-
     render() {
         this.bars[0].style.width = this.start + '%';
         this.bars[1].style.width = 100 - this.end + '%';
         this.carret.style.width = this.end - this.start + '%';
         this.scroll.style.opacity = .7;
     }
+
     prepareData() {
         let currentState = this.getCurrentState();
         this.start = currentState.start * 100;
         this.end = currentState.end * 100;
     }
+
     onUpdatePosition() {
         this.prepareData();
         this.render();
     }
-
-
-
 
 
     /**
@@ -129,15 +127,12 @@ export class Scroll extends abstractComponent {
                 this._aniStop();
             }
             if (this.drag === 'shift') {
-                // Utils.throttle(this.setAreaPosition, 10, this, x - this.deltaX);
                 this.setAreaPosition(x - this.deltaX);
             } else {
-                // Utils.throttle(this.setAreaSize, 20, this, x, this.drag);
                 this.setAreaSize(x, this.drag);
             }
             this.prevX = x;
         }
     }
-
 
 }

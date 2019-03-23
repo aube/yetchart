@@ -28,21 +28,20 @@ export class Line extends abstractElement {
             return (point) * pointWidth  + pointWidth/2 + this.left;
         };
 
+        let y, x;
         let data = this.dataset.data;
         let length = data.length || 3;
 
         let pointWidthRate = this.pointWidthRate || 1;
         let pointWidth = (this.width / length) * pointWidthRate;
-        
-        pointWidth = Math.round(pointWidth * 1000) / 1000;
-        pointWidthRate = Math.round(pointWidthRate * 1000) / 1000;
 
         let scaleYRate = this.scaleYRate || 1;
         let rate = (this.height) / Math.abs(this.max - this.min) || 1;
-        
-        let ctx = this.canvas.getContext("2d");
-        let y, x;
 
+        let ctx = this.canvas.getContext("2d");
+
+        pointWidth = Math.round(pointWidth * 1000) / 1000;
+        pointWidthRate = Math.round(pointWidthRate * 1000) / 1000;
         ctx.translate(0.5, 0.5);
         ctx.beginPath();
         ctx.lineWidth = this.options.width;

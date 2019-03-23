@@ -8,7 +8,6 @@ export class Grid extends abstractElement {
     }
 
     _drawVertical() {
-
         let _posX = (point) => {
             return point * cellWidth  + this.left;
         };
@@ -38,11 +37,9 @@ export class Grid extends abstractElement {
             ctx.lineTo(x, this.top + this.height);
         }
         ctx.stroke();
-        ctx.stroke();
     }
 
     _drawHorizontal() {
-
         let _posY = (point) => {
             return this.height - point * cellHeidht * scaleYRate  + this.top;
         };
@@ -63,12 +60,14 @@ export class Grid extends abstractElement {
             ctx.lineTo(this.left + this.width, _posY(i));
         }
 
-        if (this.activeY) {
-            let y = this.height * this.activeY  + this.top;
-            ctx.strokeStyle = this.options.activeColor;
-            ctx.moveTo(this.left, y);
-            ctx.lineTo(this.left + this.width, y);
-        }
+        // Fix: horizontal active line move up from cursor/
+        // if (this.activeY) {
+        //     let y = this.height * this.activeY  + this.top;
+        //     ctx.strokeStyle = this.options.activeColor;
+        //     ctx.moveTo(this.left, y);
+        //     ctx.lineTo(this.left + this.width, y);
+        // }
+        ctx.stroke();
 
     }
 

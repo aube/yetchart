@@ -1,18 +1,15 @@
-// import { abstractElement, Line, Grid, ScaleY, ScaleX, ScrollRects } from './element.js';
+
 import { Line } from './element.line.js';
 import { Grid } from './element.grid.js';
 import { ScaleY } from './element.scaley.js';
 import { ScaleX } from './element.scalex.js';
 import { Tooltip } from './element.tooltip.js';
 
-const elements = {Line, Grid, ScaleY, ScaleX, Tooltip};
 import Utils from './utils.js';
 
-import {objMerge} from './utils.js';
+const elements = {Line, Grid, ScaleY, ScaleX, Tooltip};
 
 export class abstractComponent {
-
-
     constructor(chart, options) {
         this._chart = chart;
         this._options = options;
@@ -55,7 +52,6 @@ export class abstractComponent {
         this._data = data;
         this.prepareData();
         this.createElements();
-        // this.normalizeMinMax2 && this.normalizeMinMax2();
         this.render();
     }
 
@@ -129,8 +125,6 @@ export class abstractComponent {
         ctx.restore();
     }
 
-
-
     render() {
         this.cleanup();
 
@@ -138,8 +132,6 @@ export class abstractComponent {
             element.draw();
         });
     }
-
-
 
     createElements() {
         this.elements = [];
@@ -161,9 +153,7 @@ export class abstractComponent {
 
                 this.addElement(elementType, sumOptions);
             }
-
         });
-
 
         this.data.datasets && this.data.datasets.forEach(dataset => {
             if (elsTypes[dataset.options.elementType]) {
@@ -185,7 +175,6 @@ export class abstractComponent {
         this.elements.sort((a, b) => a.options.zindex >= b.options.zindex ? 1 : -1);
     }
 
-
     addElement(elementType, options, data) {
         let element =  new elements[elementType](this.component, options);
         element.type = elementType;
@@ -205,6 +194,7 @@ export class abstractComponent {
 
         return dpr / bsr;
     }
+
     dataCompression(data, maxLength, type = 'pulling'){ // pulling | averaging | maximizing
         let _data = [];
         let step = data.length / maxLength;
@@ -243,7 +233,6 @@ export class abstractComponent {
     }
 
     normalizeMinMax(amount = 5) {
-
         function _n(number) {
             let n = 0;
             number = Math.abs(number);
@@ -277,11 +266,6 @@ export class abstractComponent {
 
         step = _up(step);
         this.data.max = this.data.min + step * amount;
-
-        // return {
-        //     max,
-        //     min,
-        // };
     }
 
 
