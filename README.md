@@ -1,54 +1,62 @@
-# Layout
-## HTML
-```html
-<div class="chart">
-    <div class="graph-container">
-    </div>
-</div>
-```
-## CSS
-```CSS
-.graph-container {
-    height: 300px;
-}
-```
+
+# Yetcharts example
+> <a href='https://aube.github.io/yetchart/'>https://aube.github.io/yetchart</a>
+
 
 # Initialization
-## By selector
-```javascript
-var Chart = new Chart({
-    element: '.graph-container',
-});
-Chart.data = dataStructure;
-```
-## Inside container
 ```html
+<style>
+    .graph-container {
+        height: 300px;
+    }
+</style>
+
 <div class="chart">
-    <div class="graph-container">
-        <script>
-            var Chart = new Chart();
-            Chart.data = dataStructure;
-        </script>
+    <div class="graph-container" id="Chart0">
     </div>
 </div>
-```
-## Initialisation with data extra formatting
-```javascript
-function labelNewFormat(label) {
-    return label.toLowerCase();
-}
-function titleExtraFormat(title) {
-    return 'Title: ' + title.toLowerCase();
-}
 
+<div class="chart">
+    <div class="graph-container" id="Chart1">
+    </div>
+</div>
+
+<script>
+    const chartOptions = {
+        ...
+    };
+
+    const Chart0 = new Chart({
+        element: '#Chart0',
+        ...chartOptions
+    });
+
+    const Chart1 = new Chart({
+        element: '#Chart1',
+        ...chartOptions
+    });
+
+    httpRequest('example.com').then(data => {
+        Chart0.data = data[0];
+        Chart1.data = data[1];
+    })
+</script>
+```
+
+## Setup extra labels formatting
+```javascript
 let chartOptions = {
     Graph: {
         elementsTypes: {
             ScaleX: {
-                labelsFormat: labelNewFormat
+                labelsFormat: (label) => {
+                    return label.toLowerCase();
+                }
             },
             Tooltip: {
-                titleFormat: titleExtraFormat
+                titleFormat: (title) => {
+                    return 'Title: ' + title.toLowerCase();
+                }
             }
         }
     },
@@ -60,56 +68,7 @@ var Chart = new Chart({
 });
 ```
 
-# Options
-All configuration settings are set in the JSON structure:
-```javascript
-{
-    {...base parameters}
-    "ComponentName": {
-        {...Component parameters}
-        elementsTypes: {
-            "ElementType": {...base elements parameters}
-        },
-        elements: {
-            "ElementName": {...element parameters}
-        }
-    }
-}
-```
-
-# Data format for Line chart
-```javascript
-    let data = {
-        datasets: [{
-            data: [Number],
-            options: {
-                name: 'Dataset 1',
-                color: '#333444',
-                elementType: 'Line',
-            }
-        }, {
-            data: [Number],
-            options: {
-                name: 'Dataset 2',
-                color: 'green',
-                elementType: 'Line',
-            }
-        }],
-        labels: [Number|String]
-    };
-```
-
-
-# Data & Options update
-```javascript
-    // Set new data:
-    Chart.data = newFullDataStructure; # All chart elements will be recreated
-
-    // Changing chart parameters:
-    Chart.options = partialOptionsStructure; # All chart elements will be rerendered
-```
-
-## Chart options update example
+## Instantly parameters changing
 ```javascript
     let nightSettings = {
         Graph: {
@@ -134,16 +93,52 @@ All configuration settings are set in the JSON structure:
             }
         }
     };
-    Chart.options = nightSettings; // On-fly colors changing
+    Chart.options = nightSettings;
+```
+
+## Data format & on-fly data updating
+```javascript
+    let newData = {
+        datasets: [{
+            data: [Number],
+            options: {
+                name: 'Dataset 1',
+                color: '#333444',
+                elementType: 'Line',
+            }
+        }, {
+            data: [Number],
+            options: {
+                name: 'Dataset 2',
+                color: 'green',
+                elementType: 'Line',
+            }
+        }],
+        labels: [Number|String]
+    };
+
+    Chart.data = newData; # All chart components will be reinitialised
 ```
 
 
-#Live chart examples
-> <a href='https://aube.github.io/yetchart/'>https://aube.github.io/yetchart</a>
 
+# All configuration settings are set in the JSON structure:
+```javascript
+{
+    {...base parameters}
+    "ComponentName": {
+        {...Component parameters}
+        elementsTypes: {
+            "ElementType": {...base elements parameters}
+        },
+        elements: {
+            "ElementName": {...element parameters}
+        }
+    }
+}
+```
 
-
-#Full configuration example:
+## Full configuration example:
 ```javascript
     default: {
         visibleArea: '20%',
@@ -258,3 +253,5 @@ All configuration settings are set in the JSON structure:
         },
     }
 ```
+
+
