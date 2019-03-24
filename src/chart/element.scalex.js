@@ -10,7 +10,6 @@ export class ScaleX extends abstractElement {
     draw() {
         if (!this.data) return;
 
-        this.labels = this.data.labels;
         this.init();
 
         let _posX = point => {
@@ -18,20 +17,22 @@ export class ScaleX extends abstractElement {
         };
 
         let _txt = n => {
-            let label = this.labels[n];
+            let label = labels[n];
             return options.labelsFormat ? options.labelsFormat(label) : label;
         };
 
         let options = this.options;
         let ctx = this.canvas.getContext("2d");
-        let posY = this.top + this.height + options.margin.top;
-        let length = this.labels.length;
+        ctx.beginPath();
+        ctx.font = options.fontsize * this.pixelRatio + 'px ' + options.fontname;
+
         let cellWidth = ctx.measureText('33 qwe.').width * 1.5;
+        let labels = this.data.labels;
+        let posY = this.top + this.height + options.margin.top;
+        let length = labels.length;
         let amount = Math.min(length, Math.floor(this.width / cellWidth));
         let step = Math.floor(length / amount);
 
-        ctx.beginPath();
-        ctx.font = options.fontsize * this.pixelRatio + 'px ' + options.fontname;
         cellWidth = this.width / amount;
 
         ctx.textBaseline = options.baseline;
