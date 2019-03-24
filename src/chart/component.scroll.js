@@ -1,7 +1,6 @@
 
 import { abstractComponent } from './component.js';
 import Utils from './utils.js';
-import  './scroll.scss';
 
 export class Scroll extends abstractComponent {
 

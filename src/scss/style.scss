@@ -1,3 +1,7 @@
+@import 'legend.scss';
+@import 'scroll.scss';
+@import 'night-mode.scss';
+
 @mixin mq($width, $type: min) {
     @if map_has_key($breakpoints, $width) {
         $width: map_get($breakpoints, $width);
@@ -56,58 +60,5 @@ body {
             flex: 0 0 100%;
             margin: 1em 0;
         }
-    }
-}
-
-.night-mode {
-    color: #fff;
-    background-color: #242f3e;
-    .chart-scroll{
-        .chart-scroll-bar {
-            background: #1f2a38;
-        }
-        .chart-scroll-carret {
-            border-color: #40566b;
-        }
-    }
-    .chart-legend-item {
-        border-color: #344658;
-        filter: opacity(80%) brightness(120%);
-        &.hidden {
-            .icon:after {
-                background: #242f3e;
-            }
-        }
-    }
-    canvas {
-        filter: opacity(80%)  brightness(120%);
-    }
-    .hight-mode-trigger {
-        background-color: #242f3e;
-        border-color: #555;
-        .tonight {
-            display: none;
-        }
-        .today {
-            display: inline;
-        }
-    }
-}
-
-.hight-mode-trigger {
-    position: fixed;
-    bottom: 0;
-    width: 100%;
-    text-align: center;
-    border-top: 1px solid #aaa;
-    background-color: #fff;
-    .today {
-        display: none;
-    }
-    span {
-        cursor: pointer;
-        color: #108be3;
-        font-size: 1.4em;
-        line-height: 2.6em;
     }
 }

@@ -1,8 +1,6 @@
 
 import { abstractComponent } from './component.js';
 
-import './legend.scss';
-
 export class Legend extends abstractComponent {
 
     constructor(chart, options) {
