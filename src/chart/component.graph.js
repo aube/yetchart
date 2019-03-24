@@ -18,7 +18,7 @@ export class Graph extends abstractComponent {
 
         this.component.addEventListener('mousemove', (e) => {
             e = _e(e);
-            this.setActivePoint(e.x, e.y);
+            Utils.throttle(this.setActivePoint, 10, this, e.x, e.y);
         });
         this.component.addEventListener('touchmove', (e) => {
             e = _e(e);
@@ -33,7 +33,7 @@ export class Graph extends abstractComponent {
     }
 
     renderAniY(duration, callback) {
-        let scaleYRate = this.data.scaleYRate || 1;
+        let scaleYRate = this.data.scaleYRate;
 
         this._aniYStop && this._aniYStop();
 
@@ -139,13 +139,19 @@ export class Graph extends abstractComponent {
     }
 
     setActivePoint(x, y, isTouch) {
+        if (this.activeX === x) {
+            return;
+        }
+        this.activeX = x;
+        this.activeY = y;
+
         this.prepareActiveData(x);
-        this._chart.setActivePoint(x, y, this.activeData);
+        Utils.throttle(this._chart.setActivePoint, 10, this._chart, x, y, this.activeData);
 
         // autoscroll
-        if (isTouch && (x > .9 || x < .1)) {
-            this.setAreaPosition(x > .9 ? x + .1 : x - .1);
-        }
+        // if (isTouch && (x > .9 || x < .1)) {
+        //     this.setAreaPosition(x > .9 ? x + .1 : x - .1);
+        // }
     }
 
     prepareActiveData(x) {

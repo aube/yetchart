@@ -31,9 +31,9 @@ export class Tooltip extends abstractElement {
         let _posY = i => {
             let row = Math.floor(i / columns.length);
             let y = this.top + _rowsSumHeight(row);
-            y += padding * row + padding;
+            y += padding * row;
             y += rectY;
-            y += titleHeight + padding * 3;
+            y += titleHeight + padding * 4;
             return y;
         }
 
@@ -87,6 +87,7 @@ export class Tooltip extends abstractElement {
         }
 
         ctx.textBaseline = 'middle';
+        ctx.textAlign = 'left';
 
         // rectangle
         let width = Math.max(titleWidth + padding * 2, _columnsSumWidth(columns.length) + padding * (1 + columns.length));
@@ -110,8 +111,6 @@ export class Tooltip extends abstractElement {
         ctx.fillStyle = options.background;
         ctx.fillRect(rectX, rectY, width, height);
 
-        // content
-        ctx.textAlign = 'left';
 
         ctx.fillStyle = options.color;
         ctx.font = 'bold ' + _font('fontsizeTitle');

@@ -12,12 +12,8 @@ export class Line extends abstractElement {
         this.init();
 
         let _posY = (value) => {
-            let y;
-            if (scaleYRate >= 1) {
-                y = this.height + this.top - (+value - this.min) * rate / scaleYRate;
-            } else {
-                y = (this.height + this.top - (+value - this.min) * rate) / scaleYRate;
-            }
+            let y = this.height + this.top - (+value - this.min) * rate / scaleYRate;
+
             return Math.min(y, this.height);
         };
 

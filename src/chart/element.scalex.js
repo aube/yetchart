@@ -34,7 +34,6 @@ export class ScaleX extends abstractElement {
         let step = Math.floor(length / amount);
 
         cellWidth = this.width / amount;
-
         ctx.textBaseline = options.baseline;
         ctx.fillStyle = options.color;
 

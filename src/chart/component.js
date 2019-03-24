@@ -42,10 +42,12 @@ export class abstractComponent {
         return this._chart.getCurrentState();
     }
     setAreaPosition(x, animate) {
-        this._chart.setAreaPosition(x, animate);
+        Utils.throttle(this._chart.setAreaPosition, 10, this._chart, x, animate);
+        // this._chart.setAreaPosition(x, animate);
     }
     setAreaSize(x, mode) {
-        this._chart.setAreaSize(x, mode);
+        Utils.throttle(this._chart.setAreaSize, 10, this._chart, x, mode);
+        // this._chart.setAreaSize(x, mode);
     }
 
     setData(data) {
