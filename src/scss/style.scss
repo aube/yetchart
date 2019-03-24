@@ -48,8 +48,8 @@ body {
     .chart {
         width: calc(50% - 2em);
         margin: 1em;
-        .chart-container {
-            height: 500px;
+        .graph-container {
+            height: 300px;
         }
 
         @include mq('tablet', 'max') {
@@ -98,13 +98,16 @@ body {
     position: fixed;
     bottom: 0;
     width: 100%;
+    text-align: center;
+    border-top: 1px solid #aaa;
+    background-color: #fff;
     .today {
         display: none;
     }
-    font-size: 1.4em;
-    line-height: 2.6em;
-    text-align: center;
-    color: #108be3;
-    border-top: 1px solid #aaa;
-    background-color: #fff;
+    span {
+        cursor: pointer;
+        color: #108be3;
+        font-size: 1.4em;
+        line-height: 2.6em;
+    }
 }

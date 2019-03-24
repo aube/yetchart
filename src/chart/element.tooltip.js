@@ -97,7 +97,7 @@ export class Tooltip extends abstractElement {
         rectX = Math.min(rectX, cursorX - width * 1.2);
         rectX = rectX < 0 ? cursorX + width * .2 : rectX;
 
-        let rectY = cursorY < height + padding ? cursorY + padding : padding;
+        let rectY = padding * 2;
 
         ctx.strokeStyle = options.background;
         ctx.lineJoin = 'round';
