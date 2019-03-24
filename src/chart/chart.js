@@ -7,8 +7,8 @@ import { Map } from './component.map.js';
 import { Scroll } from './component.scroll.js';
 import { Legend } from './component.legend.js';
 
-const components = {Graph, Map, Scroll, Legend};
 
+const availableComponents = {Graph, Map, Scroll, Legend};
 
 export default class Chart {
 
@@ -49,8 +49,8 @@ export default class Chart {
 
     createComponents() {
         Object.keys(this._options).forEach(componentName => {
-            if (components[componentName]) {
-                this.components.push(new components[componentName](this, this._options[componentName]));
+            if (availableComponents[componentName]) {
+                this.components.push(new availableComponents[componentName](this, this._options[componentName]));
             }
         });
     }
@@ -95,6 +95,12 @@ export default class Chart {
 
     setAreaPosition(x) {
         let w = this._end - this._start;
+
+        // autoscroll
+        if (x > 1 || x < 0) {
+            x = x > 1 ? x - 1 : x;
+            x = this._start + w / 2 + x / 10
+        }
 
         this._start = Math.min(Math.max(x - w / 2, 0), 1 - w);
         this._end = this._start + w;

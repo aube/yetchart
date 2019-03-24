@@ -19,25 +19,26 @@ export class ScaleX extends abstractElement {
 
         let _txt = n => {
             let label = this.labels[n];
-            return this.options.labelsFormat ? this.options.labelsFormat(label) : label;
+            return options.labelsFormat ? options.labelsFormat(label) : label;
         };
 
+        let options = this.options;
         let ctx = this.canvas.getContext("2d");
-        let posY = this.top + this.height + this.options.margin.top;
+        let posY = this.top + this.height + options.margin.top;
         let length = this.labels.length;
         let cellWidth = ctx.measureText('33 qwe.').width * 1.5;
         let amount = Math.min(length, Math.floor(this.width / cellWidth));
         let step = Math.floor(length / amount);
 
         ctx.beginPath();
-        ctx.font = this.options.fontsize * this.pixelRatio + 'px ' + this.options.fontname;
+        ctx.font = options.fontsize * this.pixelRatio + 'px ' + options.fontname;
         cellWidth = this.width / amount;
 
-        ctx.textBaseline = this.options.baseline;
-        ctx.fillStyle = this.options.color;
+        ctx.textBaseline = options.baseline;
+        ctx.fillStyle = options.color;
 
-        ctx.shadowColor = this.options.shadowColor || '';
-        ctx.shadowBlur = this.options.shadowBlur || 0;
+        ctx.shadowColor = options.shadowColor || '';
+        ctx.shadowBlur = options.shadowBlur || 0;
 
         // first label
         ctx.textAlign = 'left';
@@ -47,7 +48,7 @@ export class ScaleX extends abstractElement {
         ctx.textAlign = 'right';
         ctx.fillText(_txt(length - 1), this.width, posY);
 
-        ctx.textAlign = this.options.align;
+        ctx.textAlign = options.align;
 
         for (let i = 1; i < amount; i++) {
             

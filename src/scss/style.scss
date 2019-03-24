@@ -43,7 +43,7 @@ body {
 .content {
     display: flex;
     flex-flow: wrap;
-    margin: 0 1em;
+    margin: 0 1em 1em;
 
     .chart {
         width: calc(50% - 2em);
@@ -83,6 +83,8 @@ body {
         filter: opacity(80%)  brightness(120%);
     }
     .hight-mode-trigger {
+        background-color: #242f3e;
+        border-color: #555;
         .tonight {
             display: none;
         }
@@ -93,12 +95,16 @@ body {
 }
 
 .hight-mode-trigger {
+    position: fixed;
+    bottom: 0;
+    width: 100%;
     .today {
         display: none;
     }
-    margin: 100px 0 30px 0;
-    font-size: 1.4rem;
-    line-height: 2rem;
+    font-size: 1.4em;
+    line-height: 2.6em;
     text-align: center;
     color: #108be3;
+    border-top: 1px solid #aaa;
+    background-color: #fff;
 }

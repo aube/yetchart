@@ -6,6 +6,7 @@ export class Line extends abstractElement {
         super(canvas, options);
     }
 
+
     draw() {
         if (!this.dataset || this.dataset.hidden) return;
         this.init();
@@ -28,6 +29,13 @@ export class Line extends abstractElement {
             return (point) * pointWidth  + pointWidth/2 + this.left;
         };
 
+        let _drawLine = i => {
+            y = _posY(data[i]);
+            x = _posX(i);
+            ctx.lineTo(x, y);
+        }
+
+        let options = this.options;
         let y, x;
         let data = this.dataset.data;
         let length = data.length || 3;
@@ -42,46 +50,43 @@ export class Line extends abstractElement {
 
         pointWidth = Math.round(pointWidth * 1000) / 1000;
         pointWidthRate = Math.round(pointWidthRate * 1000) / 1000;
+
         ctx.translate(0.5, 0.5);
         ctx.beginPath();
-        ctx.lineWidth = this.options.width;
-        ctx.lineJoin = this.options.join;
-        ctx.strokeStyle = this.options.color;
+        ctx.lineWidth = options.width;
+        ctx.lineJoin = options.join;
+        ctx.strokeStyle = options.color;
 
-        ctx.shadowColor = this.options.shadowColor || '';
-        ctx.shadowBlur = this.options.shadowBlur || 0;
-
-        let _line = (i) => {
-            y = _posY(data[i]);
-            x = _posX(i);
-            ctx.lineTo(x, y);
-        }
+        ctx.shadowColor = options.shadowColor || '';
+        ctx.shadowBlur = options.shadowBlur || 0;
 
         let i = this.drawReverse ? length - 1 : 0;
         y = _posY(data[i]);
         x = _posX(i);
         ctx.moveTo(x, y);
         if (this.drawReverse) {
-            for (--i; i >= 0; _line(i--)) {}
+            for (--i; i >= 0; _drawLine(i--)) {}
         } else {
-            for (++i; i < length; _line(i++)) {}
+            for (++i; i < length; _drawLine(i++)) {}
         }
 
         ctx.stroke();
 
+        // Active point
         if (this.activeX) {
             let activePoint = Math.round(length * this.activeX);
             let radius = 10;
-            ctx.beginPath();
             y = _posY(data[activePoint]);
             x = _posX(activePoint);
+
+            ctx.beginPath();
             ctx.arc(x, y, radius, 0, 2 * Math.PI, false);
-            ctx.fillStyle = this.options.fillColor;
+            ctx.fillStyle = options.fillColor;
             ctx.fill();
-            ctx.lineWidth = this.options.width;
             ctx.stroke();
         }
         ctx.translate(-0.5, -0.5);
+
         // if (this.dataset.options.name === 'y0') {
         //     let x = 50;
         //     let y = 1;
@@ -99,7 +104,6 @@ export class Line extends abstractElement {
         //         ctx.fillText(i+': ' + data[i], x, y++ * 30 + 100);
         //     }
         // }
-
 
     }
 }

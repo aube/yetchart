@@ -22,7 +22,7 @@ export class Graph extends abstractComponent {
         });
         this.component.addEventListener('touchmove', (e) => {
             e = _e(e);
-            this.setActivePoint(e.x, e.y);
+            this.setActivePoint(e.x, e.y, true);
         });
         this.component.addEventListener('touchend', (e) => {
             this.setActivePoint(0, 0);
@@ -130,19 +130,22 @@ export class Graph extends abstractComponent {
         this.data.min = min;
         this.normalizeMinMax(this.options.elements.labelsAmount);
 
-
         if (prevDelta && (this.data.max - this.data.min) / prevDelta !== 1) {
             this.data.scaleYRate = (this.data.scaleYRate || 1) * (this.data.max - this.data.min) / prevDelta || 0;
         }
 
         this.data.pointWidthRate = this.data.labels && (this.data.labels.length / (to - from)) || 1;
-
         this.data.labels = this._data.labels.slice(from, to);
     }
 
-    setActivePoint(x, y, data) {
+    setActivePoint(x, y, isTouch) {
         this.prepareActiveData(x);
         this._chart.setActivePoint(x, y, this.activeData);
+
+        // autoscroll
+        if (isTouch && (x > .9 || x < .1)) {
+            this.setAreaPosition(x > .9 ? x + .1 : x - .1);
+        }
     }
 
     prepareActiveData(x) {
@@ -170,6 +173,10 @@ export class Graph extends abstractComponent {
         }
     }
 
+
+    /**
+     * Events
+     */
     onUpdatePosition() {
         this.prepareData();
 
@@ -198,7 +205,6 @@ export class Graph extends abstractComponent {
         let currentState = this.getCurrentState();
         this.activeX = currentState.activeX;
         this.activeY = currentState.activeY;
-
         this.render();
     }
 

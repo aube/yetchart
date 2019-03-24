@@ -21,7 +21,6 @@ export class Map extends abstractComponent {
     }
 
     prepareData() {
-
         let min = Infinity;
         let max = -Infinity;
         let dataMargin = .2;
@@ -49,6 +48,9 @@ export class Map extends abstractComponent {
         Object.assign(this.data, {min, max});
     }
 
+    /**
+     * Events
+     */
     onToggleDataset() {
         this.prepareData();
         this.render();

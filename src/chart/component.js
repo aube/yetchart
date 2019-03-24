@@ -7,7 +7,7 @@ import { Tooltip } from './element.tooltip.js';
 
 import Utils from './utils.js';
 
-const elements = {Line, Grid, ScaleY, ScaleX, Tooltip};
+const availableElements = {Line, Grid, ScaleY, ScaleX, Tooltip};
 
 export class abstractComponent {
     constructor(chart, options) {
@@ -145,13 +145,13 @@ export class abstractComponent {
             let elOptions = els[el];
             let elementType = elOptions.elementType || el;
 
-            if (elements[elementType]) {
+            if (availableElements[elementType]) {
                 let elsTypeOptions = elsTypes[elOptions.name || el];
 
                 let sumOptions = Utils.objMerge({}, elsTypeOptions, elOptions);
                 sumOptions.padding = Utils.sumObj(sumOptions.padding, this.options.padding);
 
-                this.addElement(elementType, sumOptions);
+                this._addElement(elementType, sumOptions);
             }
         });
 
@@ -161,12 +161,12 @@ export class abstractComponent {
                 let elsTypeOptions = elsTypes[dataset.options.elementType];
                 let elementType = elsTypeOptions.elementType;
 
-                if (elements[elementType]) {
+                if (availableElements[elementType]) {
 
                     let sumOptions = Utils.objMerge({}, elsTypeOptions, dataset.options);
                     sumOptions.padding = Utils.sumObj(sumOptions.padding, this.options.padding);
 
-                    let element = this.addElement(elementType, sumOptions);
+                    let element = this._addElement(elementType, sumOptions);
                     element.dataset = dataset;
                 }
             }
@@ -175,8 +175,8 @@ export class abstractComponent {
         this.elements.sort((a, b) => a.options.zindex >= b.options.zindex ? 1 : -1);
     }
 
-    addElement(elementType, options, data) {
-        let element =  new elements[elementType](this.component, options);
+    _addElement(elementType, options, data) {
+        let element =  new availableElements[elementType](this.component, options);
         element.type = elementType;
         element.data = data || this.data;
         this.elements.push(element);

@@ -1,19 +1,24 @@
 
 import { abstractElement } from './element.js';
 
-
 export class Grid extends abstractElement {
     constructor(canvas, options) {
         super(canvas, options);
     }
 
-    _drawVertical() {
-        let _posX = (point) => {
+    draw() {
+        this.init();
+        let _posY = point => {
+            return this.height - point * cellHeidht * scaleYRate  + this.top;
+        };
+        let _posX = point => {
             return point * cellWidth  + this.left;
         };
 
         let ctx = this.canvas.getContext("2d");
+        let cellHeidht = this.height / (this.options.horizontal);
         let cellWidth = this.width / (this.options.vertical - 1);
+        let scaleYRate = this.scaleYRate || 1;
 
         ctx.beginPath();
         ctx.lineWidth = this.options.width;
@@ -21,6 +26,11 @@ export class Grid extends abstractElement {
 
         ctx.shadowColor = this.options.shadowColor || '';
         ctx.shadowBlur = this.options.shadowBlur || 0;
+
+        for (let i = 0, ii = this.options.horizontal; i < ii; i++) {
+            ctx.moveTo(this.left, _posY(i));
+            ctx.lineTo(this.left + this.width, _posY(i));
+        }
 
         for (let i = 0, ii = this.options.vertical; i < ii; i++) {
             ctx.moveTo(_posX(i), this.top);
@@ -36,31 +46,8 @@ export class Grid extends abstractElement {
             ctx.moveTo(x, this.top);
             ctx.lineTo(x, this.top + this.height);
         }
-        ctx.stroke();
-    }
 
-    _drawHorizontal() {
-        let _posY = (point) => {
-            return this.height - point * cellHeidht * scaleYRate  + this.top;
-        };
-
-        let ctx = this.canvas.getContext("2d");
-        let cellHeidht = this.height / (this.options.horizontal);
-        let scaleYRate = this.scaleYRate || 1;
-
-        ctx.beginPath();
-        ctx.lineWidth = this.options.width;
-        ctx.strokeStyle = this.options.color;
-
-        ctx.shadowColor = this.options.shadowColor || '';
-        ctx.shadowBlur = this.options.shadowBlur || 0;
-
-        for (let i = 0, ii = this.options.horizontal; i < ii; i++) {
-            ctx.moveTo(this.left, _posY(i));
-            ctx.lineTo(this.left + this.width, _posY(i));
-        }
-
-        // Fix: horizontal active line move up from cursor/
+        // TODO: Fix horizontal active line move up from cursor/
         // if (this.activeY) {
         //     let y = this.height * this.activeY  + this.top;
         //     ctx.strokeStyle = this.options.activeColor;
@@ -68,12 +55,5 @@ export class Grid extends abstractElement {
         //     ctx.lineTo(this.left + this.width, y);
         // }
         ctx.stroke();
-
-    }
-
-    draw() {
-        this.init();
-        this._drawVertical();
-        this._drawHorizontal();
     }
 }

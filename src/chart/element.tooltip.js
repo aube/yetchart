@@ -5,20 +5,10 @@ import { abstractElement } from './element.js';
 export class Tooltip extends abstractElement {
     constructor(canvas, options) {
         super(canvas, options);
-
-        // this.container = this.canvas.parentNode;
-        // this.templateTitle = '<h3>%TITLE%</h3>';
-        // this.templateItem = '<div><p>%VALUE%</p><p>%NAME%</p></div>';
     }
-
-    prepareTemplate() {
-
-    }
-
 
     draw() {
         if (!this.activeData || !this.activeData.title) return;
-
 
         let _columnsSumWidth = (columnNumber) => {
             let x = 0;
@@ -48,11 +38,12 @@ export class Tooltip extends abstractElement {
         }
 
         let _font = name => {
-            return this.options[name] * pixelRatio + 'pt ' + this.options.fontname;
+            return options[name] * pixelRatio + 'pt ' + options.fontname;
         }
 
         this.init();
         
+        let options = this.options;
         let pixelRatio = this.pixelRatio;
         let padding = 20;
         let cursorX = this.width * this.activeX;
@@ -67,17 +58,17 @@ export class Tooltip extends abstractElement {
         columns.fill(0);
         ctx.beginPath();
 
-        title = this.options.titleFormat ? this.options.titleFormat(title) : title;
+        title = options.titleFormat ? options.titleFormat(title) : title;
 
         ctx.font = 'bold ' + _font('fontsizeValue');
-        let titleHeight = this.options.fontsizeTitle * pixelRatio;
+        let titleHeight = options.fontsizeTitle * pixelRatio;
         let titleWidth = ctx.measureText(title).width;
 
         ctx.font = 'bold ' + _font('fontsizeValue');
-        let heightValue = this.options.fontsizeValue * pixelRatio;
+        let heightValue = options.fontsizeValue * pixelRatio;
         
         ctx.font = _font('fontsizeName');
-        let heightName = this.options.fontsizeName * pixelRatio;
+        let heightName = options.fontsizeName * pixelRatio;
 
         // columns width calculate
         for (var i = 0; i < content.length; i += columns.length) {
@@ -86,18 +77,16 @@ export class Tooltip extends abstractElement {
                 let name = content[i + ii].name;
 
                 ctx.font = _font('fontsizeValue');
-                let width0 = ctx.measureText(value).width;
+                columns[ii] = Math.max(columns[ii], ctx.measureText(value).width);
                 
                 ctx.font = _font('fontsizeName');
-                let width1 = ctx.measureText(name).width;
+                columns[ii] = Math.max(columns[ii], ctx.measureText(name).width);
 
-                columns[ii] = Math.max(columns[ii], width0, width1);
                 columns[ii] = +columns[ii].toFixed(2);
             }
         }
 
         ctx.textBaseline = 'middle';
-
 
         // rectangle
         let width = Math.max(titleWidth + padding * 2, _columnsSumWidth(columns.length) + padding * (1 + columns.length));
@@ -110,22 +99,21 @@ export class Tooltip extends abstractElement {
 
         let rectY = cursorY < height + padding ? cursorY + padding : padding;
 
-        ctx.strokeStyle = this.options.background;
+        ctx.strokeStyle = options.background;
         ctx.lineJoin = 'round';
         ctx.lineWidth = 15;
         ctx.strokeRect(rectX, rectY, width, height);
 
-        ctx.shadowColor = this.options.shadowColor || '';
-        ctx.shadowBlur = this.options.shadowBlur || 0;
+        ctx.shadowColor = options.shadowColor || '';
+        ctx.shadowBlur = options.shadowBlur || 0;
 
-        ctx.fillStyle = this.options.background;
+        ctx.fillStyle = options.background;
         ctx.fillRect(rectX, rectY, width, height);
 
         // content
         ctx.textAlign = 'left';
 
-
-        ctx.fillStyle = this.options.color;
+        ctx.fillStyle = options.color;
         ctx.font = 'bold ' + _font('fontsizeTitle');
         ctx.fillText(title, rectX + padding, rectY + padding * 2);
 

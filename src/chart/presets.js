@@ -28,7 +28,7 @@ export default {
                     elementType: 'Grid',
                     vertical: 0,
                     horizontal: 5,
-                    width: 1,
+                    width: 2,
                     color: '#f2f4f5',
                     activeColor: '#dfe6eb',
                     zindex: -1,
@@ -36,7 +36,6 @@ export default {
                 ScaleY: {
                     elementType: 'ScaleY',
                     labelsAmount: 5,
-                    left: true,
                     color: '#96a2aa',
                     shadowColor: '#fff',
                     shadowBlur: 15,
@@ -47,7 +46,6 @@ export default {
                 },
                 ScaleX: {
                     elementType: 'ScaleX',
-                    bottom: true,
                     color: '#96a2aa',
                     shadowColor: '#fff',
                     shadowBlur: 15,

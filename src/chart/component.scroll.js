@@ -76,6 +76,9 @@ export class Scroll extends abstractComponent {
         this.end = currentState.end * 100;
     }
 
+    /**
+     * Events
+     */
     onUpdatePosition() {
         this.prepareData();
         this.render();
@@ -107,9 +110,7 @@ export class Scroll extends abstractComponent {
         if (!this.drag && x) {
             this._scrollMoveAni(x);
         }
-        setTimeout(() => {
-            this.drag = false;
-        });
+        this.drag = false;
     }
 
     mouseleave(x, y) {
