@@ -1,27 +1,27 @@
-#Layout
-##HTML
+# Layout
+## HTML
 ```html
 <div class="chart">
     <div class="graph-container">
     </div>
 </div>
 ```
-##CSS
+## CSS
 ```CSS
 .graph-container {
     height: 300px;
 }
 ```
 
-#Initialization
-##By selector
+# Initialization
+## By selector
 ```javascript
 var Chart = new Chart({
     element: '.graph-container',
 });
 Chart.data = dataStructure;
 ```
-##Inside container
+## Inside container
 ```html
 <div class="chart">
     <div class="graph-container">
@@ -32,7 +32,7 @@ Chart.data = dataStructure;
     </div>
 </div>
 ```
-##Initialisation with data extra formatting
+## Initialisation with data extra formatting
 ```javascript
 function labelNewFormat(label) {
     return label.toLowerCase();
@@ -60,7 +60,7 @@ var Chart = new Chart({
 });
 ```
 
-#Options
+# Options
 All configuration settings are set in the JSON structure:
 ```javascript
 {
@@ -77,7 +77,7 @@ All configuration settings are set in the JSON structure:
 }
 ```
 
-#Data format for Line chart
+# Data format for Line chart
 ```javascript
     let data = {
         datasets: [{
@@ -100,7 +100,7 @@ All configuration settings are set in the JSON structure:
 ```
 
 
-#Data & Options update
+# Data & Options update
 ```javascript
     // Set new data:
     Chart.data = newFullDataStructure; # All chart elements will be recreated
@@ -109,7 +109,7 @@ All configuration settings are set in the JSON structure:
     Chart.options = partialOptionsStructure; # All chart elements will be rerendered
 ```
 
-##Chart options update example
+## Chart options update example
 ```javascript
     let nightSettings = {
         Graph: {
