@@ -5,13 +5,13 @@
     <title>Document</title>
     <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
     <!-- inject:css -->
-    <link rel="stylesheet" href="style.b04db44a8238a4c2bb5b.css?7bf696f60ec7bec45931">
+    <link rel="stylesheet" href="style.5abb47f3bc6ab5e647b2.css?2b4e685242e2ebf34a8c">
     <!-- endinject -->
 </head>
 
 <body>
     <!-- inject:js -->
-    <script src="main.b04db44a8238a4c2bb5b.js?7bf696f60ec7bec45931"></script>
+    <script src="main.5abb47f3bc6ab5e647b2.js?2b4e685242e2ebf34a8c"></script>
     <!-- endinject -->
 
     <div class="content"></div>
@@ -53,11 +53,6 @@
 
             let daySettings = {
                 Graph: {
-                    elementsTypes: {
-                        Line: {
-                            fillColor: '#fff'
-                        }
-                    },
                     elements: {
                         Grid: {
                             color: '#f2f4f5',
@@ -82,11 +77,6 @@
 
             let nightSettings = {
                 Graph: {
-                    elementsTypes: {
-                        Line: {
-                            fillColor: '#242f3e'
-                        }
-                    },
                     elements: {
                         Grid: {
                             color: '#293544',
@@ -107,8 +97,8 @@
                         }
                     }
                 }
-
             };
+
             toggleNightMode.night = !toggleNightMode.night;
             activeCharts.forEach(Chart => {
                 Chart.options = toggleNightMode.night ? nightSettings : daySettings;
@@ -137,14 +127,14 @@
                 for (var i = 0; i < result.length; i++) {
                     // layout
                     let chart = document.createElement('DIV');
-                    let chartContainer = document.createElement('DIV');
+                    let graphContainer = document.createElement('DIV');
                     chart.className = 'chart';
-                    chartContainer.className = 'chart-container';
-                    chart.appendChild(chartContainer);
+                    graphContainer.className = 'graph-container';
+                    chart.appendChild(graphContainer);
                     content.appendChild(chart);
 
                     // chart activation
-                    defaultChartSettings.element = chartContainer;
+                    defaultChartSettings.element = graphContainer;
                     let Chart = new $Chart(defaultChartSettings);
                     Chart.data = dataConvertation(result[i]);
 
@@ -182,30 +172,30 @@
             });
         };
 
-        function dataConvertation(data) {
-            let converted = {
+        function dataConvertation(rawData) {
+            let data = {
                 datasets: []
             };
-            data.columns.forEach(column => {
+            rawData.columns.forEach(column => {
                 let name = column.shift();
                 if (name === 'x') {
-                    converted.labels = column;
+                    data.labels = column;
                     return;
                 }
                 // column = column.map(c => Math.random().toFixed(2) * 1); // test
-                let elementType = data.types[name].charAt(0).toUpperCase() + data.types[name].slice(1).toLowerCase();
+                let elementType = rawData.types[name].charAt(0).toUpperCase() + rawData.types[name].slice(1).toLowerCase();
                 let ds = {
                     data: column,
                     options: {
                         name,
-                        color: data.colors[name],
+                        color: rawData.colors[name],
                         elementType,
                     }
                 }
 
-                converted.datasets.push(ds);
+                data.datasets.push(ds);
             });
-            return converted;
+            return data;
         }
     </script>
 </body>

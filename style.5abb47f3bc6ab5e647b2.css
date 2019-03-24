@@ -1,17 +1,3 @@
-.chart-scroll {
-  height: 100%;
-  width: 100%;
-  display: flex;
-  opacity: 0; }
-  .chart-scroll .chart-scroll-bar {
-    height: 100%;
-    background: #f5f9fb; }
-  .chart-scroll .chart-scroll-carret {
-    height: calc(100% - 4px);
-    background: transparent;
-    border: 2px #ddeaf3 solid;
-    border-left-width: 10px;
-    border-right-width: 10px; }
 .chart-legend {
   width: 100%;
   margin: 2rem 0; }
@@ -54,25 +40,21 @@
       border-radius: 50%;
       margin-top: .1rem;
       margin-left: .1rem; }
-body {
-  margin: 0 auto;
-  max-width: 56em;
-  padding: 1em 0;
-  font-family: arial; }
 
-.content {
+.chart-scroll {
+  height: 100%;
+  width: 100%;
   display: flex;
-  flex-flow: wrap;
-  margin: 0 1em; }
-  .content .chart {
-    width: calc(50% - 2em);
-    margin: 1em; }
-    .content .chart .chart-container {
-      height: 500px; }
-    @media only screen and (max-width: 767px) {
-      .content .chart {
-        flex: 0 0 100%;
-        margin: 1em 0; } }
+  opacity: 0; }
+  .chart-scroll .chart-scroll-bar {
+    height: 100%;
+    background: #f5f9fb; }
+  .chart-scroll .chart-scroll-carret {
+    height: calc(100% - 4px);
+    background: transparent;
+    border: 2px #ddeaf3 solid;
+    border-left-width: 10px;
+    border-right-width: 10px; }
 
 .night-mode {
   color: #fff;
@@ -88,16 +70,45 @@ body {
       background: #242f3e; }
   .night-mode canvas {
     filter: opacity(80%) brightness(120%); }
-  .night-mode .hight-mode-trigger .tonight {
-    display: none; }
-  .night-mode .hight-mode-trigger .today {
-    display: inline; }
+  .night-mode .hight-mode-trigger {
+    background-color: #242f3e;
+    border-color: #555; }
+    .night-mode .hight-mode-trigger .tonight {
+      display: none; }
+    .night-mode .hight-mode-trigger .today {
+      display: inline; }
 
 .hight-mode-trigger {
-  margin: 100px 0 30px 0;
-  font-size: 1.4rem;
-  line-height: 2rem;
+  position: fixed;
+  bottom: 0;
+  width: 100%;
   text-align: center;
-  color: #108be3; }
+  border-top: 1px solid #aaa;
+  background-color: #fff; }
   .hight-mode-trigger .today {
     display: none; }
+  .hight-mode-trigger span {
+    cursor: pointer;
+    color: #108be3;
+    font-size: 1.4em;
+    line-height: 2.6em; }
+
+body {
+  margin: 0 auto;
+  max-width: 56em;
+  padding: 1em 0;
+  font-family: arial; }
+
+.content {
+  display: flex;
+  flex-flow: wrap;
+  margin: 0 1em 1em; }
+  .content .chart {
+    width: calc(50% - 2em);
+    margin: 1em; }
+    .content .chart .graph-container {
+      height: 300px; }
+    @media only screen and (max-width: 767px) {
+      .content .chart {
+        flex: 0 0 100%;
+        margin: 1em 0; } }
