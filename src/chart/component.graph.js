@@ -18,7 +18,7 @@ export class Graph extends abstractComponent {
 
         this.component.addEventListener('mousemove', (e) => {
             e = _e(e);
-            Utils.throttle(this.setActivePoint, 10, this, e.x, e.y);
+            this.setActivePoint(e.x, e.y);
         });
         this.component.addEventListener('touchmove', (e) => {
             e = _e(e);
@@ -41,7 +41,6 @@ export class Graph extends abstractComponent {
             duration: duration || 200,
             exec: (progress) => {
                 this.data.scaleYRate = 1 + scaleYRate * (1 - progress);
-                Utils.throttle(this.render, 10, this);
             },
             callback: () => {
                 this._aniYStop = false;
@@ -59,7 +58,6 @@ export class Graph extends abstractComponent {
             duration: duration || 200,
             exec: (progress) => {
                 this.data.pointWidthRate = 1 - pointWidthRate * (1 - progress);
-                Utils.throttle(this.render, 10, this);
             },
             callback: () => {
                 this._aniXStop = false;
@@ -69,20 +67,26 @@ export class Graph extends abstractComponent {
     }
 
     render() {
-        this.cleanup();
-        this.elements.forEach(element => {
-            element.scaleYRate = this.data.scaleYRate;
-            element.pointWidthRate = this.data.pointWidthRate;
-            element.min = this.data.min;
-            element.max = this.data.max;
-            element.drawReverse = this.drawReverse;
-            element.activeY = this.activeY;
-            element.activeX = this.activeX;
-            element.activeData = this.activeData;
-            // element.fpsX = (this._aniXStop || {}).fps;
-            // element.fpsY = (this._aniYStop || {}).fps;
-            element.draw();
-        });
+        if (this._aniYStop || this.renderAniX || this.rendering) {
+            this.rendering = true;
+            this.cleanup();
+            this.elements.forEach(element => {
+                element.scaleYRate = this.data.scaleYRate;
+                element.pointWidthRate = this.data.pointWidthRate;
+                element.min = this.data.min;
+                element.max = this.data.max;
+                element.drawReverse = this.drawReverse;
+                element.activeY = this.activeY;
+                element.activeX = this.activeX;
+                element.activeData = this.activeData;
+                // element.fpsX = (this._aniXStop || {}).fps;
+                // element.fpsY = (this._aniYStop || {}).fps;
+                element.draw();
+            });
+            this.rendering = false;
+        }
+        requestAnimationFrame(this.render.bind(this));
+        // setTimeout(this.render, 100)
     }
 
     prepareData() {
@@ -146,12 +150,12 @@ export class Graph extends abstractComponent {
         this.activeY = y;
 
         this.prepareActiveData(x);
-        Utils.throttle(this._chart.setActivePoint, 10, this._chart, x, y, this.activeData);
+        this._chart.setActivePoint(x, y, this.activeData);
 
         // autoscroll
-        // if (isTouch && (x > .9 || x < .1)) {
-        //     this.setAreaPosition(x > .9 ? x + .1 : x - .1);
-        // }
+        if (isTouch && (x > .9 || x < .1)) {
+            this.setAreaPosition(x > .9 ? x + .1 : x - .1);
+        }
     }
 
     prepareActiveData(x) {
@@ -211,7 +215,6 @@ export class Graph extends abstractComponent {
         let currentState = this.getCurrentState();
         this.activeX = currentState.activeX;
         this.activeY = currentState.activeY;
-        this.render();
     }
 
 }

@@ -134,7 +134,7 @@ export default class Chart {
     }
 
     onScreenResize() {
-        this.callComponents(['resize', 'render']);
+        this.callComponents(['resize']);
     }
 
 }

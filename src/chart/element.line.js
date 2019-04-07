@@ -42,7 +42,7 @@ export class Line extends abstractElement {
         let scaleYRate = this.scaleYRate || 1;
         let rate = (this.height) / Math.abs(this.max - this.min) || 1;
 
-        let ctx = this.canvas.getContext("2d");
+        let ctx = this.ctx;
 
         pointWidth = Math.round(pointWidth * 1000) / 1000;
         pointWidthRate = Math.round(pointWidthRate * 1000) / 1000;

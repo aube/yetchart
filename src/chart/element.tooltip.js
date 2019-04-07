@@ -53,7 +53,7 @@ export class Tooltip extends abstractElement {
         let title = this.activeData.title;
         let columns = Array(Math.ceil(Math.sqrt(content.length)));
         let rows = Math.ceil(content.length / columns.length);
-        let ctx = this.canvas.getContext("2d");
+        let ctx = this.ctx;
 
         columns.fill(0);
         ctx.beginPath();
@@ -93,7 +93,6 @@ export class Tooltip extends abstractElement {
         let width = Math.max(titleWidth + padding * 2, _columnsSumWidth(columns.length) + padding * (1 + columns.length));
         let height = _rowsSumHeight(rows) + padding * (1 + rows) + titleHeight + padding * 2;
 
-
         let rectX = cursorX;
         rectX = Math.min(rectX, cursorX - width * 1.2);
         rectX = rectX < 0 ? cursorX + width * .2 : rectX;
@@ -105,12 +104,8 @@ export class Tooltip extends abstractElement {
         ctx.lineWidth = 15;
         ctx.strokeRect(rectX, rectY, width, height);
 
-        ctx.shadowColor = options.shadowColor || '';
-        ctx.shadowBlur = options.shadowBlur || 0;
-
         ctx.fillStyle = options.background;
         ctx.fillRect(rectX, rectY, width, height);
-
 
         ctx.fillStyle = options.color;
         ctx.font = 'bold ' + _font('fontsizeTitle');
@@ -122,9 +117,6 @@ export class Tooltip extends abstractElement {
 
             ctx.fillStyle = content[i].color;
 
-            ctx.shadowColor = '';
-            ctx.shadowBlur = 0;
-            
             ctx.font = 'bold ' + _font('fontsizeValue');
             ctx.fillText(content[i].value, x, y);
             ctx.font = _font('fontsizeName');

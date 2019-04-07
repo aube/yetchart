@@ -41,9 +41,9 @@ export class Scroll extends abstractComponent {
             e = _e(e);
             this.mousedown(e.x, e.y, 0.05);
         });
-        this.scroll.addEventListener('mouseleave', (e) => {
-            this.drag = false;
-        });
+        // this.scroll.addEventListener('mouseleave', (e) => {
+        //     this.drag = false;
+        // });
     }
 
     _scrollMoveAni(x) {
@@ -67,6 +67,7 @@ export class Scroll extends abstractComponent {
         this.bars[1].style.width = 100 - this.end + '%';
         this.carret.style.width = this.end - this.start + '%';
         this.scroll.style.opacity = .7;
+        requestAnimationFrame(this.render.bind(this));
     }
 
     prepareData() {
@@ -80,7 +81,6 @@ export class Scroll extends abstractComponent {
      */
     onUpdatePosition() {
         this.prepareData();
-        this.render();
     }
 
 

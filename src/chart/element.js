@@ -6,13 +6,14 @@ export class abstractElement {
     constructor(canvas, options) {
         this.options = options;
         this.canvas = canvas;
+        this.ctx = this.canvas.getContext("2d");
     }
 
     updateOptions(options) {
         this.options = Utils.objMerge(this.options, options, true);
     }
 
-    init() {
+    setBounds() {
         let padding = this.options.padding || {};
 
         this.top = padding.top || 0;
@@ -26,5 +27,9 @@ export class abstractElement {
 
         this.width -= this.left + this.right;
         this.height -=  this.top + this.bottom;
+    }
+    
+    init() {
+        this.setBounds();
     }
 }

@@ -17,28 +17,23 @@ export class ScaleY extends abstractElement {
         };
 
         let options = this.options;
-        let ctx = this.canvas.getContext("2d");
+        let ctx = this.ctx;
         let labelsAmount = options.labelsAmount;
         let scaleYRate = this.scaleYRate || 1;
         let cellHeidht = this.height / labelsAmount * scaleYRate;
         let step = (this.max - this.min) / labelsAmount;
         let x = this.left
         
-        ctx.beginPath();
         ctx.textAlign = 'left';
         ctx.textBaseline = options.baseline;
         ctx.font = options.fontsize * this.pixelRatio + 'px ' + options.fontname;
         ctx.fillStyle = options.color;
 
-        ctx.shadowColor = options.shadowColor || '';
-        ctx.shadowBlur = options.shadowBlur || 0;
-
         for (let i = 1, ii = labelsAmount; i <= ii; i++) {
             let txt = Math.round(this.max - (step * i));
-            ctx.fillText(isNaN(txt) ? '' : txt, x, _posY(labelsAmount - i));
+            if (!isNaN(txt))
+                ctx.fillText(txt, x, _posY(labelsAmount - i));
         }
-
-        ctx.stroke();
     }
 }
 

@@ -122,10 +122,10 @@
             Graph: {
                 elementsTypes: {
                     ScaleX: {
-                        labelsFormat: ts2date
+                        // labelsFormat: ts2date
                     },
                     Tooltip: {
-                        titleFormat: ts2dateTooltip
+                        // titleFormat: ts2dateTooltip
                     }
                 }
             },
@@ -189,7 +189,7 @@
             rawData.columns.forEach(column => {
                 let name = column.shift();
                 if (name === 'x') {
-                    data.labels = column;
+                    data.labels = column.map(v => ts2date(v));
                     return;
                 }
                 // column = column.map(c => Math.random().toFixed(2) * 1); // test

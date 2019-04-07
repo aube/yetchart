@@ -22,8 +22,8 @@ export class ScaleX extends abstractElement {
         };
 
         let options = this.options;
-        let ctx = this.canvas.getContext("2d");
-        ctx.beginPath();
+        let ctx = this.ctx;
+
         ctx.font = options.fontsize * this.pixelRatio + 'px ' + options.fontname;
 
         let cellWidth = ctx.measureText('33 qwe.').width * 1.5;
@@ -36,9 +36,6 @@ export class ScaleX extends abstractElement {
         cellWidth = this.width / amount;
         ctx.textBaseline = options.baseline;
         ctx.fillStyle = options.color;
-
-        ctx.shadowColor = options.shadowColor || '';
-        ctx.shadowBlur = options.shadowBlur || 0;
 
         // first label
         ctx.textAlign = 'left';
@@ -56,7 +53,6 @@ export class ScaleX extends abstractElement {
             let txt = _txt(i * step);
             ctx.fillText(txt, x, posY);
         }
-        ctx.stroke();
 
         // let x = this.width - 10;
         // let y = 1;
