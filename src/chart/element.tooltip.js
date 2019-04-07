@@ -3,12 +3,12 @@ import { abstractElement } from './element.js';
 
 
 export class Tooltip extends abstractElement {
-    constructor(canvas, options) {
-        super(canvas, options);
+    constructor(params) {
+        super(params);
     }
 
     draw() {
-        if (!this.activeData || !this.activeData.title) return;
+        if (!this.$state.activeData) return;
 
         let _columnsSumWidth = (columnNumber) => {
             let x = 0;
@@ -41,16 +41,16 @@ export class Tooltip extends abstractElement {
             return options[name] * pixelRatio + 'pt ' + options.fontname;
         }
 
-        this.init();
-        
+        // this.init();
+
         let options = this.options;
         let pixelRatio = this.pixelRatio;
         let padding = 20;
-        let cursorX = this.width * this.activeX;
-        let cursorY = this.height * this.activeY;
+        let cursorX = this.width * this.$state.activeX;
+        let cursorY = this.height * this.$state.activeY;
 
-        let content = this.activeData.content;
-        let title = this.activeData.title;
+        let content = this.$state.activeData.content;
+        let title = this.$state.activeData.title;
         let columns = Array(Math.ceil(Math.sqrt(content.length)));
         let rows = Math.ceil(content.length / columns.length);
         let ctx = this.ctx;
@@ -95,13 +95,13 @@ export class Tooltip extends abstractElement {
 
         let rectX = cursorX;
         rectX = Math.min(rectX, cursorX - width * 1.2);
-        rectX = rectX < 0 ? cursorX + width * .2 : rectX;
+        rectX = rectX < 0 ? cursorX + padding * 4 : rectX;
 
-        let rectY = padding * 2;
+        let rectY = Math.max(cursorY - height, 0 + padding);
 
-        ctx.strokeStyle = options.background;
+        ctx.strokeStyle = options.bordercolor;
         ctx.lineJoin = 'round';
-        ctx.lineWidth = 15;
+        ctx.lineWidth = options.width;
         ctx.strokeRect(rectX, rectY, width, height);
 
         ctx.fillStyle = options.background;

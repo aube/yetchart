@@ -1,5 +1,20 @@
 const Utils = {
-    
+
+    copyObj: function (o) {
+        if (!o || typeof o !== 'object')
+            return o;
+
+        var d = o instanceof Array ? [] : Object.create(Object.getPrototypeOf(o)),
+            keys = Object.getOwnPropertyNames(o);
+
+        for (var i = 0, n = keys.length; i < n; ++i) {
+            var key = keys[i];
+            Object.defineProperty(d, key, Object.getOwnPropertyDescriptor(o, key));
+        }
+
+        return d;
+    },
+
     objMerge: function(base, objs, extend = true) {
         let args = Array.prototype.slice.call(arguments, 1);
         if (args.length < 1) {
@@ -37,22 +52,69 @@ const Utils = {
         return base;
     },
 
-    percent2value: function(param, value = 1) {
-        if (typeof param === 'number') {
-            return param <= 1 ? value * param : param;
+    // TODO try to use reduce
+    arrDelta: function(base, arr) {
+        if (!base) {
+            return arr.slice();
         }
-        return param.indexOf('%') ? parseInt(param) / 100 * value : parseFloat(param);
+        let len = arr.length;
+        let delta = Array(len);
+        for (var i = 0; i < len; i++) {
+            delta[i] = Utils.isDef(base[i]) ? arr[i] - base[i] : 0;
+        }
+        return delta;
+    },
+
+    // TODO try to use reduce
+    objDelta: function(base, obj, keys) {
+        let delta = {};
+        keys = keys || Object.keys(obj);
+
+        for (let i = 0; i < keys.length; i++) {
+            let key = keys[i];
+
+            if (typeof obj[key] === 'number') {
+                delta[key] = Utils.isDef(base[key]) ? obj[key] - base[key] : 0;
+            } else if (obj[key] && Object.getPrototypeOf(obj[key]).constructor === Array) {
+                delta[key] = Utils.arrDelta(base[key], obj[key]);
+            }
+        };
+        return delta;
+    },
+
+    // TODO try to use reduce
+    arrSum: function(base, arr = [], progress = 1) {
+        // console.log('bap', base, arr, progress);
+        if (!base) {
+            return arr.slice();
+        }
+
+        let result = [];
+        let len = arr.length;
+        for (var i = 0; i < len; i++) {
+            result[i] = (base[i] || 0) + arr[i] * progress;
+        }
+        return result;
+    },
+
+    // TODO try to use reduce
+    objSum: function(base = {}, obj = {}, progress = 1) {
+        let result = {};
+        Object.keys(obj).forEach(key => {
+            if (typeof obj[key] === 'number') {
+                // console.log('key', key);
+                result[key] = (base[key] || 0) + obj[key] * progress;
+            } else if (obj[key] && Object.getPrototypeOf(obj[key]).constructor === Array) {
+                result[key] = Utils.arrSum(base[key], obj[key], progress);
+            } else {
+                result[key] = base[key];
+            }
+        });
+        return result;
     },
 
     isDef: function(v) {
         return typeof v !== 'undefined';
-    },
-
-    sumObj: function(base = {}, obj = {}) {
-        Object.keys(obj).forEach(key => {
-            base[key] = (base[key] || 0) + obj[key];
-        });
-        return base;
     },
 
     animate: function(options) {
@@ -98,14 +160,14 @@ const Utils = {
             let progress = timing(timeFraction);
 
             // fps
-            let stamp = performance.now();
-            handle.fps = Math.round(1000 / (stamp - prevStamp));
-            prevStamp = stamp;
+            // let stamp = performance.now();
+            // handle.fps = Math.round(1000 / (stamp - prevStamp));
+            // prevStamp = stamp;
 
-            // low fps, end animation
-            if (handle.fps < 20) {
-                progress = timeFraction = 1;
-            }
+            // // low fps, end animation
+            // if (handle.fps < 20) {
+            //     progress = timeFraction = 1;
+            // }
 
             options.exec(progress);
 
@@ -121,15 +183,19 @@ const Utils = {
 
     getEventXY: function(e, el) {
 
-        let offsets = el.getBoundingClientRect();
-        let pos;
 
-        if (e.pageX && e.pageY) {
-            pos = e;
-        } else if (e.targetTouches && e.targetTouches.length === 1){
-            pos = e.targetTouches[0];
+        let offsets = el.getBoundingClientRect();
+        let pos = e.targetTouches ? e.targetTouches[0] : e;
+
+        if (!pos) {
+            console.log('e', e);
         }
-        
+
+        // if (e.pageX || e.pageY) {
+        //     pos = e;
+        // } else if (e.targetTouches && e.targetTouches.length === 1){
+        //     pos = e.targetTouches[0];
+        // }
         return {
             x: pos.pageX - offsets.left,
             y: pos.clientY - offsets.top,
@@ -142,21 +208,21 @@ const Utils = {
      * @param {Number}    to      [timeout ms]
      * @param {any}       context [this of executed function]
      */
-    throttle: function(fn, to = 200, context = null) {
-        let args = Array.prototype.slice.call(arguments, 2);
+    // throttle: function(fn, to = 200, context = null) {
+    //     let args = Array.prototype.slice.call(arguments, 2);
 
-        if (fn.throttle) {
-            clearTimeout(fn.throttle);
-        }
+    //     if (fn.throttle) {
+    //         clearTimeout(fn.throttle);
+    //     }
 
-        return new Promise((resolve, reject) => {
-            fn.throttle = setTimeout(() => {
-                fn.throttle = null;
-                let result = fn.call(...args);
-                resolve(result);
-            }, to);
-        });
-    }
+    //     return new Promise((resolve, reject) => {
+    //         fn.throttle = setTimeout(() => {
+    //             fn.throttle = null;
+    //             let result = fn.call(...args);
+    //             resolve(result);
+    //         }, to);
+    //     });
+    // }
 }
 
 export default Utils;

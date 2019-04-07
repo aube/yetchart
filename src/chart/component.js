@@ -11,52 +11,70 @@ const availableElements = {Line, Grid, ScaleY, ScaleX, Tooltip};
 
 export class abstractComponent {
     constructor(chart, options) {
+        // console.log('options', options);
         this._chart = chart;
-        this._options = options;
+        
+        this.$state = chart.$state;
+        this.$methods = chart.$methods;
+        
+        this.options = options;
+        this.container = chart.container;
+        this.elements = [];
+        this.datasets = [];
+        this.pixelRatio = 1;
+        this.dataMargin = .2;
 
-        let parent = options.inheritOptions;
-        let parentOptions = {};
-        if (parent) {
-            parentOptions = chart.getComponentOptions(parent);
-            delete parentOptions.elements;
+        let parent = this.options.outside ? this.container.parentNode : this.container;
+        if (options.type === 'html') {
+            this.div = parent.appendChild(document.createElement('DIV'));
+        } else {
+            this.canvas = parent.appendChild(document.createElement('CANVAS'));
+            this.pixelRatio = this.getPixelRatio(this.canvas);
+            this.ctx = this.canvas.getContext("2d");
+            // this.ctx.scale(this.pixelRatio, this.pixelRatio);
         }
 
-        this.options = Utils.objMerge(
-            {},
-            parentOptions,
-            options,
-            true
-        );
+        this.component = this.canvas || this.div;
 
-        this.container = chart.container;
+        if (this.options.attrs) {
+            Object.keys(this.options.attrs).forEach(key => {
+                this.component.setAttribute(key, this.options.attrs[key]);
+            });
+        }
+        if (this.options.style) {
+            Object.keys(this.options.style).forEach(key => {
+                this.component.style[key] = this.options.style[key];
+            });
+            this.component.style.position = 'absolute';
+        }
 
-        this.elements = [];
-        this.data = {datasets: []};
-        this.type = this.options.type || 'canvas';
-        this.createComponent();
-        this.resize();
+        this.setSizes();
+        this.registerEvents();
     }
 
 
-    getCurrentState() {
-        return this._chart.getCurrentState();
-    }
     setAreaPosition(x, animate) {
-        this._chart.setAreaPosition(x, animate);
+
+        x = Math.max(Math.min(1, x), 0);
+        this.$methods.setAreaPosition(x, animate);
     }
+
     setAreaSize(x, mode) {
-        this._chart.setAreaSize(x, mode);
+        x = Math.max(Math.min(1, x), 0);
+        this.$methods.setAreaSize(x, mode);
     }
 
     setData(data) {
-        this._data = data;
+        this.$data = data;
+        // console.log('setData on', this.name);
+        this.createDataElements();
         this.prepareData();
         this.createElements();
-        this.render();
+        this.render(true);
     }
 
     updateOptions(options = {}) {
-        this.options = Utils.objMerge({}, this._options, options, true);
+        this.options = Utils.objMerge({}, this.options, options, true);
 
         this.elements.forEach(element => {
             let options = Utils.objMerge(
@@ -67,56 +85,26 @@ export class abstractComponent {
         });
     }
 
-    createComponent() {
-        let tag = this.type === 'canvas' ? 'CANVAS' : 'DIV';
-        let parent = this.options.outside ? this.container.parentNode : this.container;
+    setSizes() {
+        let containerHeight = this.container.offsetHeight;
+        let containerWidth = this.container.offsetWidth;
 
-        this.component = parent.appendChild(document.createElement(tag));
-
-        this.pixelRatio = this.type === 'canvas' ? this.getPixelRatio(this.component) : 1;
-
-        this.component.style.background = this.options.background;
-        if (this.options.attrs) {
-            Object.keys(this.options.attrs).forEach(key => {
-                this.component.setAttribute(key, this.options.attrs[key]);
-            });
+        this.width = this.component.offsetWidth;
+        this.height = this.component.offsetHeight;
+        if (this.canvas) {
+            this.canvas.setAttribute('width', parseInt(this.width * this.pixelRatio));
+            this.canvas.setAttribute('height', parseInt(this.height * this.pixelRatio));
+            this.canvas.setAttribute('ratio', parseInt(this.pixelRatio));
         }
-        if (this.options.style) {
-            Object.keys(this.options.style).forEach(key => {
-                this.component.style[key] = this.options.style[key];
-            });
-        }
-    }
 
-    resize() {
-        if (this.containerHeight === this.container.offsetHeight
-            && this.containerWidth === this.container.offsetWidth) {
-            return false;
-        }
-        this.containerHeight = this.container.offsetHeight;
-        this.containerWidth = this.container.offsetWidth;
-
-        this.top = Utils.percent2value(this.options.top, this.containerHeight);
-        this.left = Utils.percent2value(this.options.left, this.containerWidth);
-        this.height = Utils.percent2value(this.options.height, this.containerHeight);
-        this.width = Utils.percent2value(this.options.width, this.containerWidth);
-
-        this.component.setAttribute('width', parseInt(this.width * this.pixelRatio));
-        this.component.setAttribute('height', parseInt(this.height * this.pixelRatio));
-        this.component.setAttribute('ratio', parseInt(this.pixelRatio));
-
-        this.component.style.position = 'absolute';
-        this.component.style.width = parseInt(this.width) + 'px';
-        this.component.style.height = parseInt(this.height) + 'px';
-        this.component.style.top = parseInt(this.top) + 'px';
-        this.component.style.left = parseInt(this.left) + 'px';
+        this.callElements(['setSizes']);
     }
 
     cleanup() {
-        if (this.type !== 'canvas') {
+        if (!this.canvas) {
             return;
         }
-        var ctx = this.component.getContext("2d");
+        var ctx = this.ctx;
         ctx.save();
         ctx.setTransform(1, 0, 0, 1, 0, 0);
         ctx.clearRect(0, 0, this.width * this.pixelRatio, this.height * this.pixelRatio);
@@ -125,15 +113,34 @@ export class abstractComponent {
 
     render() {
         this.cleanup();
+        this.callElements(['draw']);
+        // requestAnimationFrame(this.render.bind(this));
+    }
 
-        this.elements.forEach(element => {
-            element.draw();
+    createDataElement(dataset) {
+        let datasetOptions = dataset.options;
+        let type = datasetOptions.elementType;
+        let options = this.options;
+        let elementsTypesSettings = options.elementsTypes || {};
+        if (elementsTypesSettings[type] && availableElements[type]) {
+            let typeOptions = elementsTypesSettings[type];
+            let mergedOptions = Utils.objMerge({}, typeOptions, datasetOptions);
+            mergedOptions.offset = Utils.objSum(mergedOptions.offset, options.offset);
+// console.log('mergedOptions.offset, options.offset', mergedOptions.offset, options.offset);
+            
+            let element = this._addElement(type, mergedOptions);
+            element.dataset = dataset;
+        }
+    }
+
+    createDataElements() {
+        this.$data.datasets.forEach(dataset => {
+            this.createDataElement(dataset);
         });
-        requestAnimationFrame(this.render.bind(this));
     }
 
     createElements() {
-        this.elements = [];
+        // this.elements = [];
 
         let elsTypes = this.options.elementsTypes || {};
         let els = this.options.elements;
@@ -147,27 +154,11 @@ export class abstractComponent {
             if (availableElements[elementType]) {
                 let elsTypeOptions = elsTypes[elOptions.name || el];
 
-                let sumOptions = Utils.objMerge({}, elsTypeOptions, elOptions);
-                sumOptions.padding = Utils.sumObj(sumOptions.padding, this.options.padding);
+                let mergedOptions = Utils.objMerge({}, elsTypeOptions, elOptions);
+                mergedOptions.offset = Utils.objSum(mergedOptions.offset, this.options.offset);
 
-                this._addElement(elementType, sumOptions);
-            }
-        });
-
-        this.data.datasets && this.data.datasets.forEach(dataset => {
-            if (elsTypes[dataset.options.elementType]) {
-
-                let elsTypeOptions = elsTypes[dataset.options.elementType];
-                let elementType = elsTypeOptions.elementType;
-
-                if (availableElements[elementType]) {
-
-                    let sumOptions = Utils.objMerge({}, elsTypeOptions, dataset.options);
-                    sumOptions.padding = Utils.sumObj(sumOptions.padding, this.options.padding);
-
-                    let element = this._addElement(elementType, sumOptions);
-                    element.dataset = dataset;
-                }
+                let element = this._addElement(elementType, mergedOptions);
+                element.data = this.data;
             }
         });
 
@@ -175,12 +166,28 @@ export class abstractComponent {
     }
 
     _addElement(elementType, options, data) {
-        let element =  new availableElements[elementType](this.component, options);
+
+        let element =  new availableElements[elementType]({
+            canvas: this.canvas,
+            ctx: this.ctx,
+            options
+        });
         element.type = elementType;
-        element.data = data || this.data;
+        element.$data = this.$data;
+        element.$state = this.$state;
+        element.$componentState = this.$componentState;
+
         this.elements.push(element);
         return element;
     }
+
+    callElements(methods) {
+        this.elements.forEach(element => {
+            methods.forEach(method => element[method] && element[method]());
+        });
+    }
+
+
 
     getPixelRatio(canvas){
         let ctx = canvas.getContext("2d");
@@ -231,7 +238,7 @@ export class abstractComponent {
         return _data;
     }
 
-    normalizeMinMax(amount = 5) {
+    normalizeMinMax(min, max, amount = 5) {
         function _n(number) {
             let n = 0;
             number = Math.abs(number);
@@ -253,18 +260,23 @@ export class abstractComponent {
             return Math.floor(number * n) / n;
         }
 
-        if (this.data.max > this.data.min * 2) {
-            this.data.min = 0;
+        if (max > min * 2) {
+            min = 0;
         } else {
-            this.data.min = _down(this.data.min);
+            min = _down(min);
         }
 
-        this.data.max *= 1.05;
+        // max *= 1.05;
 
-        let step = (this.data.max - this.data.min) / amount;
+        let step = (max - min) / amount;
+        if (step * 1.2 < _up(step)) {
+            step = Math.round(step * 1.1);
+        } else {
+            step = _up(step);
+        }
 
-        step = _up(step);
-        this.data.max = this.data.min + step * amount;
+        max = min + step * amount;
+        return {min, max};
     }
 
 
@@ -285,6 +297,47 @@ export class abstractComponent {
             min,
             max
         };
+    }
+
+
+
+
+    checkEvent(e, eventName) {
+        let ignoreTarget = !['Mousedown', 'Touchstart'].includes(eventName);
+        if (!ignoreTarget && e.path && !e.path.includes(this.component)) {
+            return {x: false, y: false};
+        }
+
+        let ignoreCoordinates = ['Mouseup', 'Touchend'].includes(eventName);
+        if (ignoreCoordinates) {
+            return {x: true, y: true};
+        }
+        let xy = Utils.getEventXY(e, this.component);
+        return {x: xy.x / this.width, y: xy.y / this.height};
+    }
+    registerEvents() {
+        let t = this;
+
+        function event(e, eventName) {
+            let {x, y} = t.checkEvent(e, eventName);
+            if (x === false) return;
+            t['on' + eventName](x, y, e);
+        }
+
+        ['Mouseup', 'Touchend', 'Mousemove', 'Touchmove', 'Mousedown', 'Touchstart'].forEach(eventName => {
+            if (this['on' + eventName])
+                document.addEventListener(eventName.toLowerCase(), e => {event(e, eventName)}, true);
+        });
+    }
+
+    /**
+     * Events
+     */
+    
+
+    onScreenResize() {
+        this.setSizes();
+        this.render();
     }
 
 }

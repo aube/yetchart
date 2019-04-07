@@ -4,6 +4,8 @@ const ExtractTextPlugin = require('extract-text-webpack-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
 const CleanWebpackPlugin = require('clean-webpack-plugin');
 const CopyWebpackPlugin = require('copy-webpack-plugin');
+const TerserPlugin = require('terser-webpack-plugin');
+const MinifyPlugin = require('babel-minify-webpack-plugin');
 
 module.exports = {
   entry: { main: './src/index.js' },
@@ -21,7 +23,10 @@ module.exports = {
         test: /\.js$/,
         exclude: /node_modules/,
         use: {
-          loader: "babel-loader"
+          loader: 'babel-loader',
+          // options: {
+          //   presets: ['env']
+          // }
         }
       },
       {
@@ -36,6 +41,7 @@ module.exports = {
   },
   plugins: [ 
     new CleanWebpackPlugin(),
+    new MinifyPlugin(),
     new ExtractTextPlugin(
       {filename: 'style.[chunkhash].css', disable: false, allChunks: true}
     ),
@@ -50,5 +56,27 @@ module.exports = {
       template: './src/index.html',
       filename: 'index.html'
     }),
-  ]
+  ],
+  // optimization: {
+  //   noEmitOnErrors: true,
+  //   minimizer: [
+  //     new TerserPlugin({
+  //       terserOptions: {
+  //         ecma: 5,
+  //         warnings: false,
+  //         parse: {},
+  //         compress: {},
+  //         mangle: true, // Note `mangle.properties` is `false` by default.
+  //         module: false,
+  //         output: null,
+  //         toplevel: false,
+  //         nameCache: null,
+  //         ie8: false,
+  //         keep_classnames: undefined,
+  //         keep_fnames: false,
+  //         safari10: false,
+  //       },
+  //     }),
+  //   ],
+  // }
 };

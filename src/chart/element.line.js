@@ -2,50 +2,89 @@
 import { abstractElement } from './element.js';
 
 export class Line extends abstractElement {
-    constructor(canvas, options) {
-        super(canvas, options);
+    constructor(params) {
+        super(params);
     }
 
+    getMinMax(data){
+        if (!data) {
+            return false;
+        }
+
+        let min = Infinity,
+            max = -Infinity;
+
+        for (let i = data.length - 1; i >= 0; i--) {
+            min = Math.min(min, +data[i]);
+            max = Math.max(max, +data[i]);
+        }
+
+        return {
+            min,
+            max
+        };
+    }
+
+    calculate() {
+        let start = this.$componentState.start || this.$state.start;
+        let end = this.$componentState.end || this.$state.end;
+        let min = this.$componentState.min;
+        let max = this.$componentState.max;
+
+        if (
+            this.start === start && this.end === end &&
+            this.max === max && this.min === min
+        ) {
+            return;
+        }
+
+        let dataset = this.dataset;
+        let values = dataset.values;
+        let length = values.length;
+        let from = Math.floor(length * start);
+        let to = Math.ceil(length * end);
+        let verticalRate = this.height / (max - min) || 1;
+
+        let _posY = (value) => {
+            return this.height - value * verticalRate + this.top;
+        };
+
+        this.pointsY = [];
+        this.pointsX = [];
+        for (var i = from; i < to; i++) {
+            this.pointsY.push(_posY(values[i]));
+        }
+
+        this.start = start;
+        this.end = end;
+        this.min = min;
+        this.max = max;
+    }
 
     draw() {
         if (!this.dataset || this.dataset.hidden) return;
-        this.init();
+        this.calculate();
 
-        let _posY = (value) => {
-            let y = this.height + this.top - (+value - this.min) * rate / scaleYRate;
-
-            return Math.min(y, this.height);
-        };
-
-        let _posX = (point) => {
-            if (this.drawReverse) {
-                point = length - point;
-                return this.width - point * pointWidth  + pointWidth/2 + this.left;
-            }
-            return (point) * pointWidth  + pointWidth/2 + this.left;
+        let _posX = point => {
+            return point * pointWidth + pointWidth/2 * 0 + this.left ;
         };
 
         let _drawLine = i => {
-            y = _posY(data[i]);
+            y = this.pointsY[i];
             x = _posX(i);
             ctx.lineTo(x, y);
+            // debug
+            // ctx.fillText(i, x, y + 30);
+            // ctx.fillText(this.dataset.values[i], x, y + 60);
         }
 
         let options = this.options;
         let y, x;
-        let data = this.dataset.data;
-        let length = data.length || 3;
+        let length = this.pointsY.length;
 
-        let pointWidthRate = this.pointWidthRate || 1;
-        let pointWidth = (this.width / length) * pointWidthRate;
-
-        let scaleYRate = this.scaleYRate || 1;
-        let rate = (this.height) / Math.abs(this.max - this.min) || 1;
-
+        let pointWidth = this.width / (length - 1);
         let ctx = this.ctx;
 
-        pointWidth = Math.round(pointWidth * 1000) / 1000;
-        pointWidthRate = Math.round(pointWidthRate * 1000) / 1000;
 
         ctx.translate(0.5, 0.5);
         ctx.beginPath();
@@ -53,26 +92,20 @@ export class Line extends abstractElement {
         ctx.lineJoin = options.join;
         ctx.strokeStyle = options.color;
 
-        ctx.shadowColor = options.shadowColor || '';
-        ctx.shadowBlur = options.shadowBlur || 0;
-
-        let i = this.drawReverse ? length - 1 : 0;
-        y = _posY(data[i]);
-        x = _posX(i);
+        let i = 0;
+        y = this.pointsY[i];
+        x = this.pointsX[i];
         ctx.moveTo(x, y);
-        if (this.drawReverse) {
-            for (--i; i >= 0; _drawLine(i--)) {}
-        } else {
-            for (++i; i < length; _drawLine(i++)) {}
-        }
+
+        for (i; i < length; _drawLine(i++)) {}
 
         ctx.stroke();
 
         // Active point
-        if (this.activeX) {
-            let activePoint = Math.round(length * this.activeX);
+        if (this.$state.activeX) {
+            let activePoint = this.$state.activeData.activePoint;
             let radius = 10;
-            y = _posY(data[activePoint]);
+            y = this.pointsY[activePoint];
             x = _posX(activePoint);
 
             ctx.beginPath();
@@ -81,25 +114,22 @@ export class Line extends abstractElement {
             ctx.fill();
             ctx.stroke();
         }
-        ctx.translate(-0.5, -0.5);
 
-        // if (this.dataset.options.name === 'y0') {
+        // debug
+        // if (this.dataset.name === 'y0') {
         //     let x = 50;
         //     let y = 1;
         //     ctx.textAlign = 'left';
         //     ctx.font = '32px arial';
-        //     ctx.fillText('drawReverse: ' + this.drawReverse, x, y++ * 30 + 100);
-        //     ctx.fillText('fpsY: ' + this.fpsY, x, y++ * 30 + 100);
-        //     ctx.fillText('fpsX: ' + this.fpsX, x, y++ * 30 + 100);
-        //     ctx.fillText('pointWidth: ' + pointWidth, x, y++ * 30 + 100);
-        //     ctx.fillText('pointWidthRate: ' + pointWidthRate, x, y++ * 30 + 100);
-        //     ctx.fillText('scaleYRate: ' + scaleYRate, x, y++ * 30 + 100);
+        //     ctx.fillStyle = '#333';
         //     ctx.fillText('length: ' + length, x, y++ * 30 + 100);
 
-        //     for (let i = 0; i < length; i++) {
-        //         ctx.fillText(i+': ' + data[i], x, y++ * 30 + 100);
-        //     }
+        //     Object.keys(this.$state).forEach(key => {
+        //         ctx.fillText(key + ': ' + this.$state[key], x, y++ * 30 + 100);
+        //     });
         // }
 
+        ctx.stroke();
+        ctx.translate(-0.5, -0.5);
     }
 }

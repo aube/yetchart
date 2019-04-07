@@ -2,20 +2,21 @@
 import { abstractElement } from './element.js';
 
 export class Grid extends abstractElement {
-    constructor(canvas, options) {
-        super(canvas, options);
+    constructor(params) {
+        super(params);
     }
 
+
     draw() {
-        this.init();
+        // this.init();
         let _posY = point => {
             return this.height - point * cellHeidht * scaleYRate  + this.top;
         };
         let _posX = point => {
             return point * cellWidth  + this.left;
         };
-
-        let ctx = this.canvas.getContext("2d");
+// console.log('this.height', this.height);
+        let ctx = this.ctx;
         let cellHeidht = this.height / (this.options.horizontal);
         let cellWidth = this.width / (this.options.vertical - 1);
         let scaleYRate = this.scaleYRate || 1;

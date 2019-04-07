@@ -8,7 +8,7 @@ export class Legend extends abstractComponent {
         this.name = 'Legend';
     }
 
-    resize() {}
+    setSizes() {}
 
     render() {
         this.component.innerHTML = this.template;
@@ -16,18 +16,17 @@ export class Legend extends abstractComponent {
         for (let i = 0; i < btns.length; i++) {
             btns[i].addEventListener('click', (e) => {
                 btns[i].classList.toggle('hidden');
-                this._chart.toggleDataset(i);
+                this.$methods.toggleDataset(i);
             });
         }
     }
 
     prepareData() {
         this.template = '';
-        this._data.datasets.forEach(_dataset => {
-            let o = _dataset.options;
+        this.$data.datasets.forEach(dataset => {
             this.template += this.options.itemTemplate
-                .replace('%TEXT%', o.title || o.name)
-                .replace('%COLOR%', o.color);
+                .replace('%TEXT%', dataset.name)
+                .replace('%COLOR%', dataset.options.color);
         });
     }
 

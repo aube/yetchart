@@ -53,7 +53,7 @@ body {
         width: calc(50% - 2em);
         margin: 1em;
         .graph-container {
-            height: 300px;
+            height: 500px;
         }
 
         @include mq('tablet', 'max') {

@@ -18,22 +18,30 @@ export default class Chart {
         const defOpt = Presets[preset] || Presets.default;
 
         this._options = Utils.objMerge({}, defOpt, options, true);
-        
+
+        this.$state = {
+            start: 0,
+            end: .1,
+        };
+
+        this.$methods = {
+            setAreaPosition: this.setAreaPosition.bind(this),
+            setAreaSize: this.setAreaSize.bind(this),
+            setActivePoint: this.setActivePoint.bind(this),
+            toggleDataset: this.toggleDataset.bind(this),
+        };
+
         this.setContainer(options && options.element);
         this.createComponents();
-        this.callComponents(['resize']);
 
-        let visibleAreaWidth = Utils.percent2value(this._options.visibleArea || '10%');
-        this._start = options.areaStartPositionAtLast ? 1 - visibleAreaWidth : 0;
-        this._end = options.areaStartPositionAtLast ? 1 : visibleAreaWidth;
 
         window.addEventListener('resize', () => {this.onScreenResize();});
     }
 
     set data(data) {
-        this.baseData = data;
+        this.$data = data;
         this.components.forEach(component => {
-            component.setData(this.baseData);
+            component.setData(this.$data);
         });
     }
 
@@ -50,7 +58,14 @@ export default class Chart {
     createComponents() {
         Object.keys(this._options).forEach(componentName => {
             if (availableComponents[componentName]) {
-                this.components.push(new availableComponents[componentName](this, this._options[componentName]));
+
+                let options = this._options[componentName];
+                let inheritedOptions = this._options[options.inheritOptions] || {};
+                if (inheritedOptions.elements) {
+                    delete inheritedOptions.elements;
+                }
+                options = Utils.objMerge({}, inheritedOptions, options);
+                this.components.push(new availableComponents[componentName](this, options));
             }
         });
     }
@@ -82,19 +97,9 @@ export default class Chart {
         return Utils.objMerge({}, this._options[componentName]);
     }
 
-    getCurrentState() {
-        return {
-            start: this._start,
-            end: this._end,
-            drawReverse: this.drawReverse,
-            activeX: this.activeX,
-            activeY: this.activeY,
-            activeData: this.activeData,
-        };
-    }
 
     setAreaPosition(x) {
-        let w = this._end - this._start;
+        let w = this.$state.end - this.$state.start;
 
         // autoscroll
         if (x > 1 || x < 0) {
@@ -102,39 +107,49 @@ export default class Chart {
             x = this._start + w / 2 + x / 10
         }
 
-        this._start = Math.min(Math.max(x - w / 2, 0), 1 - w);
-        this._end = this._start + w;
-        this._start = +this._start.toFixed(3);
-        this._end = +this._end.toFixed(3);
+        let _start = Math.min(Math.max(x - w / 2, 0), 1 - w);
+        let _end = _start + w;
+        _start = +_start.toFixed(3);
+        _end = +_end.toFixed(3);
+
+        this.$state.start = _start;
+        this.$state.end = _end;
+        this.$state.resize = false;
+
         this.callComponents(['onUpdatePosition']);
     }
 
     setAreaSize(x, type) {
         let minimumSize = .07;
+
         if (type === 'start') {
-            this._start = +Math.min(Math.max(x, 0), this._end - minimumSize).toFixed(3);
-            this.drawReverse = true;
+            this.$state.start = +Math.min(Math.max(x, 0), this.$state.end - minimumSize).toFixed(3);
+            this.$state.drawReverse = true;
         } else {
-            this._end = +Math.max(Math.min(x, 1), this._start + minimumSize).toFixed(3);
-            this.drawReverse = false;
+            this.$state.end = +Math.max(Math.min(x, 1), this.$state.start + minimumSize).toFixed(3);
+            this.$state.drawReverse = false;
         }
+        this.$state.resize = true;
+
         this.callComponents(['onUpdatePosition']);
     }
 
     setActivePoint(x, y, data) {
-        this.activeX = x;
-        this.activeY = y;
-        this.activeData = data;
+
+        this.$state.activeX = x;
+        this.$state.activeY = y;
+        this.$state.activeData = data;
+
         this.callComponents(['onSetActivePoint']);
     }
 
     toggleDataset(index) {
-        this.baseData.datasets[index].hidden = !this.baseData.datasets[index].hidden;
+        this.$data.datasets[index].hidden = !this.$data.datasets[index].hidden;
         this.callComponents(['onToggleDataset']);
     }
 
     onScreenResize() {
-        this.callComponents(['resize']);
+        this.callComponents(['onScreenResize']);
     }
 
 }

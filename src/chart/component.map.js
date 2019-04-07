@@ -1,3 +1,14 @@
+// +debug
+// import { Line } from './element.line.js';
+// import { Grid } from './element.grid.js';
+// import { ScaleY } from './element.scaley.js';
+// import { ScaleX } from './element.scalex.js';
+// import { Tooltip } from './element.tooltip.js';
+
+// import Utils from './utils.js';
+// const availableElements = {Line, Grid, ScaleY, ScaleX, Tooltip};
+// -debug
+
 
 import { abstractComponent } from './component.js';
 
@@ -9,43 +20,27 @@ export class Map extends abstractComponent {
         this.data = {
             datasets: []
         };
+        this.$componentState = {};
     }
 
-    render() {
-        this.cleanup();
-        this.elements.forEach(element => {
-            element.min = this.data.min;
-            element.max = this.data.max;
-            element.draw();
-        });
-    }
 
     prepareData() {
-        let min = Infinity;
-        let max = -Infinity;
-        let dataMargin = .2;
+        let globalMin = Infinity;
+        let globalMax = -Infinity;
 
-        this._data.datasets.forEach(_dataset => {
-            let dataset = this.data.datasets.find(ds => ds.options.name === _dataset.options.name);
-            if (!dataset) {
-                dataset = {
-                    options: Object.assign({}, _dataset.options),
-                    data: [],
-                };
-                this.data.datasets.push(dataset);
-            }
-
-            dataset.hidden = _dataset.hidden;
+        this.$data.datasets.forEach(dataset => {
             if (!dataset.hidden) {
-                dataset.data = this.dataCompression(_dataset.data, this.width * this.pixelRatio);
-                // dataset minmax
-                Object.assign(dataset, this.getMinMax(dataset.data));
-
-                min = Math.min(dataset.min, min) * dataMargin;
-                max = Math.max(dataset.max, max) * (1 + dataMargin);
+                let values = this.dataCompression(dataset.values, this.width * this.pixelRatio);;
+                let mm = Object.assign({}, this.getMinMax(values));
+                globalMin = Math.min(mm.min, globalMin);
+                globalMax = Math.max(mm.max, globalMax);
             }
         });
-        Object.assign(this.data, {min, max});
+        
+        this.$componentState.min = globalMin;
+        this.$componentState.max = globalMax;
+        this.$componentState.start = 0.0001;
+        this.$componentState.end = 1;
     }
 
     /**

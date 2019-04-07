@@ -12,42 +12,15 @@ export class Scroll extends abstractComponent {
         this.bars = this.component.getElementsByClassName('chart-scroll-bar');
         this.carret = this.component.querySelector('.chart-scroll-carret');
         this.scroll = this.component.querySelector('.chart-scroll');
+    }
 
-        let _e = (e, el) => {
-            e = Utils.getEventXY(e, this.component);
-            return {x: e.x / this.width, y: e.y / this.height};
-        }
-
-        this.scroll.addEventListener('mouseup', (e) => {
-            e = _e(e);
-            this.mouseup(e.x, e.y);
-        });
-        this.scroll.addEventListener('touchend', (e) => {
-            this.mouseup();
-        });
-        this.scroll.addEventListener('mousemove', (e) => {
-            e = _e(e);
-            this.mousemove(e.x, e.y);
-        });
-        this.scroll.addEventListener('touchmove', (e) => {
-            e = _e(e);
-            this.mousemove(e.x, e.y);
-        });
-        this.scroll.addEventListener('mousedown', (e) => {
-            e = _e(e);
-            this.mousedown(e.x, e.y, 0.05);
-        });
-        this.scroll.addEventListener('touchstart', (e) => {
-            e = _e(e);
-            this.mousedown(e.x, e.y, 0.05);
-        });
-        // this.scroll.addEventListener('mouseleave', (e) => {
-        //     this.drag = false;
-        // });
+    setData(data) {
+        this.prepareData();
+        this.render();
     }
 
     _scrollMoveAni(x) {
-        let current = (this.start + this.end) / 200;
+        let current = (this.start + this.end) / 2 / 100;
         let shift = x - current;
 
         if (this._aniStop) {
@@ -67,11 +40,10 @@ export class Scroll extends abstractComponent {
         this.bars[1].style.width = 100 - this.end + '%';
         this.carret.style.width = this.end - this.start + '%';
         this.scroll.style.opacity = .7;
-        requestAnimationFrame(this.render.bind(this));
     }
 
     prepareData() {
-        let currentState = this.getCurrentState();
+        let currentState = this.$state;
         this.start = currentState.start * 100;
         this.end = currentState.end * 100;
     }
@@ -81,15 +53,14 @@ export class Scroll extends abstractComponent {
      */
     onUpdatePosition() {
         this.prepareData();
+        this.render();
     }
 
-
-    /**
-     * Drag'n'Drop
-     */
-    mousedown(x, y, accuracy) {
-        this.startX = x;
-        let currentState = this.getCurrentState();
+    onMousedown(x, y) {
+        this.drag = 'click';
+        this.clickX = x;
+        let accuracy = 0.05;
+        let currentState = this.$state;
         let relAccuracy = (currentState.end - currentState.start) * accuracy * 2;
 
         if (currentState.start - accuracy <= x && currentState.end + accuracy >= x) {
@@ -104,35 +75,38 @@ export class Scroll extends abstractComponent {
         }
     }
 
-    mouseup(x, y) {
-        this.startX = null;
-        if (!this.drag && x) {
-            this._scrollMoveAni(x);
+    onMouseup() {
+        if (this.drag === 'click') {
+            this.setAreaPosition(this.clickX);
         }
         this.drag = false;
+        this.clickX = false;
     }
 
-    mouseleave(x, y) {
-        this.drag = false;
-    }
-
-    mousemove(x, y) {
+    onMousemove(x, y) {
         if (!this.drag) {
             return;
         }
 
-        if (this.drag) {
-
-            if (this._aniStop) {
-                this._aniStop();
-            }
-            if (this.drag === 'shift') {
-                this.setAreaPosition(x - this.deltaX);
-            } else {
-                this.setAreaSize(x, this.drag);
-            }
-            this.prevX = x;
+        if (this.drag === 'click') {
+            this.clickX = x;
+        }else if (this.drag === 'shift') {
+            this.clickX = x;
+            this.setAreaPosition(x - this.deltaX);
+        } else if (['start', 'end'].includes(this.drag)) {
+            this.setAreaSize(x, this.drag);
         }
     }
 
+    onTouchend() {
+        this.onMouseup();
+    }
+
+    onTouchmove(x, y) {
+        this.onMousemove(x, y);
+    }
+
+    onTouchstart(x, y) {
+        this.onMousedown(x, y);
+    }
 }

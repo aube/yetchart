@@ -10,152 +10,81 @@ export class Graph extends abstractComponent {
         this.data = {
             datasets: []
         };
-
-        let _e = (e, el) => {
-            e = Utils.getEventXY(e, this.component);
-            return {x: e.x / this.width, y: e.y / this.height};
-        }
-
-        this.component.addEventListener('mousemove', (e) => {
-            e = _e(e);
-            this.setActivePoint(e.x, e.y);
-        });
-        this.component.addEventListener('touchmove', (e) => {
-            e = _e(e);
-            this.setActivePoint(e.x, e.y, true);
-        });
-        this.component.addEventListener('touchend', (e) => {
-            this.setActivePoint(0, 0);
-        });
-        this.component.addEventListener('mouseleave', (e) => {
-            this.setActivePoint(0, 0);
-        });
+        this.$componentState = {};
     }
 
-    renderAniY(duration, callback) {
-        let scaleYRate = this.data.scaleYRate;
-
-        this._aniYStop && this._aniYStop();
-
-        this._aniYStop = Utils.animate({
-            duration: duration || 200,
-            exec: (progress) => {
-                this.data.scaleYRate = 1 + scaleYRate * (1 - progress);
-            },
-            callback: () => {
-                this._aniYStop = false;
-            },
-            context: this
-        });
-    }
-
-    renderAniX(duration, callback) {
-        let pointWidthRate = this.data.pointWidthRate - 1;
-
-        this._aniXStop && this._aniXStop();
-
-        this._aniXStop = Utils.animate({
-            duration: duration || 200,
-            exec: (progress) => {
-                this.data.pointWidthRate = 1 - pointWidthRate * (1 - progress);
-            },
-            callback: () => {
-                this._aniXStop = false;
-            },
-            context: this
-        });
-    }
-
-    render() {
-        if (this._aniYStop || this.renderAniX || this.rendering) {
-            this.rendering = true;
+    render(force) {
+        if (force || this.elementsAnimate) {
             this.cleanup();
             this.elements.forEach(element => {
-                element.scaleYRate = this.data.scaleYRate;
-                element.pointWidthRate = this.data.pointWidthRate;
-                element.min = this.data.min;
-                element.max = this.data.max;
-                element.drawReverse = this.drawReverse;
-                element.activeY = this.activeY;
-                element.activeX = this.activeX;
-                element.activeData = this.activeData;
-                // element.fpsX = (this._aniXStop || {}).fps;
-                // element.fpsY = (this._aniYStop || {}).fps;
                 element.draw();
             });
-            this.rendering = false;
+            if (!force)
+                requestAnimationFrame(this.render.bind(this));
         }
-        requestAnimationFrame(this.render.bind(this));
-        // setTimeout(this.render, 100)
     }
 
     prepareData() {
-        let currentState = this.getCurrentState();
+        let currentState = this.$state;
         let to, from, w;
-        let min = Infinity;
-        let max = -Infinity;
+        let globalMin = Infinity;
+        let globalMax = -Infinity;
+        let dataMargin = this.dataMargin;
+        let animations = [];
+        let newData;
+        let mm;
         this.drawReverse = currentState.drawReverse;
 
-        w = Math.round((currentState.end - currentState.start) * this._data.labels.length);
+        w = Math.round((currentState.end - currentState.start) * this.$data.labels.length);
         if (this.drawReverse) {
-            to = Math.floor(currentState.end * this._data.labels.length);
+            to = Math.floor(currentState.end * this.$data.labels.length);
             from = Math.max(0, to - w);
         } else {
-            from = Math.ceil(currentState.start * this._data.labels.length);
+            from = Math.ceil(currentState.start * this.$data.labels.length);
             to = from + w;
         }
 
-        this._data.datasets.forEach(_dataset => {
-            let dataset = this.data.datasets.find(ds => ds.options.name === _dataset.options.name);
-            if (!dataset) {
-                dataset = {
-                    options: Object.assign({}, _dataset.options),
-                    data: [],
-                };
-                this.data.datasets.push(dataset);
-            }
-
-            dataset.hidden = _dataset.hidden;
+        this.$data.datasets.forEach(dataset => {
             if (!dataset.hidden) {
-                dataset.data = _dataset.data.slice(from, to);
-                dataset.data = this.dataCompression(dataset.data, this.width * this.pixelRatio);
-
-                // dataset minmax
-                Object.assign(dataset, this.getMinMax(dataset.data));
-
-                min = Math.min(dataset.min, min);
-                max = Math.max(dataset.max, max);
+                let values = dataset.values.slice(from, to);
+                mm = Object.assign({}, this.getMinMax(values));
+                globalMin = Math.min(mm.min, globalMin);
+                globalMax = Math.max(mm.max, globalMax);
             }
         });
 
-        let prevDelta = this.data.max - this.data.min || 0;
+        mm = this.normalizeMinMax(globalMin, globalMax, this.options.elements.ScaleY.labelsAmount);
 
-        this.data.max = max;
-        this.data.min = min;
-        this.normalizeMinMax(this.options.elements.labelsAmount);
+        this.$componentState.max = mm.max;
+        this.$componentState.min = mm.min;
+        this.data.labels = this.$data.labels.slice(from, to);
+        this.render(true);
 
-        if (prevDelta && (this.data.max - this.data.min) / prevDelta !== 1) {
-            this.data.scaleYRate = (this.data.scaleYRate || 1) * (this.data.max - this.data.min) / prevDelta || 0;
-        }
+        // this.datasets.forEach(dataset => {
+        //     if (!dataset.hidden) {
+        //         newData.globalMin = globalMin;
+        //         newData.globalMax = globalMax;
+        //         animations.push(dataset.element.setData(newData));
+        //     }
+        // });
 
-        this.data.pointWidthRate = this.data.labels && (this.data.labels.length / (to - from)) || 1;
-        this.data.labels = this._data.labels.slice(from, to);
+        // this.elementsAnimate = true;
+        // this.render();
+        // animations.sort();
+        // if (this.animation) {
+        //     clearTimeout(this.animation);
+        // }
+        // this.animation = setTimeout(()=>{
+        //     this.elementsAnimate = false;
+        // }, animations.pop());
     }
 
-    setActivePoint(x, y, isTouch) {
-        if (this.activeX === x) {
-            return;
-        }
-        this.activeX = x;
-        this.activeY = y;
+    setActivePoint(x, y) {
+        if (this._activeX === x) return;
+        this._activeX = x;
 
         this.prepareActiveData(x);
-        this._chart.setActivePoint(x, y, this.activeData);
-
-        // autoscroll
-        if (isTouch && (x > .9 || x < .1)) {
-            this.setAreaPosition(x > .9 ? x + .1 : x - .1);
-        }
+        this.$methods.setActivePoint(x, y, this.activeData);
     }
 
     prepareActiveData(x) {
@@ -163,23 +92,27 @@ export class Graph extends abstractComponent {
             this.activeData = false;
             return;
         }
+
+        x = (this.$state.end - this.$state.start) * x;
         let title;
         let content = [];
-        let activePoint = Math.round(this.data.labels.length * x);
-        title = this.data.labels[activePoint];
+        let activePoint = Math.round(this.$data.labels.length * x);
 
-        this.data.datasets.forEach(ds => {
+        title = this.$data.labels[activePoint];
+
+        this.$data.datasets.forEach(ds => {
             if (ds.hidden) return;
             content.push({
-                name: ds.options.name,
+                name: ds.name,
                 color: ds.options.color,
-                value: ds.data[activePoint]
+                value: ds.values[activePoint]
             })
         });
 
         this.activeData = {
             title,
-            content
+            content,
+            activePoint
         }
     }
 
@@ -189,33 +122,48 @@ export class Graph extends abstractComponent {
      */
     onUpdatePosition() {
         this.prepareData();
-
-        if (this.data.pointWidthRate !== 1) {
-            if (!this._aniXStop) {
-                this.renderAniX();
-            }
-        } else {
-            if (!this._aniXStop) {
-                this.renderAniX();
-            }
-        }
-        if (this.data.scaleYRate != 1) {
-            if (!this._aniYStop) {
-                this.renderAniY();
-            }
-        }
+        super.render();
     }
 
     onToggleDataset() {
         this.prepareData();
-        this.renderAniY();
+        super.render();
     }
 
     onSetActivePoint() {
-        let currentState = this.getCurrentState();
-        this.activeX = currentState.activeX;
-        this.activeY = currentState.activeY;
+        super.render();
     }
 
+
+    /**
+     * Events
+     */
+    onMouseup() {
+        this.setActivePoint(0, 0);
+    }
+
+    onMousedown(x, y) {
+        this.setActivePoint(x, y);
+    }
+
+    onMousemove(x, y, e) {
+        if (e.path && !e.path.includes(this.component)) {
+            this.setActivePoint(0, 0);
+            return;
+        }
+        this.setActivePoint(x, y);
+    }
+
+    onTouchend() {
+        this.setActivePoint(0, 0);
+    }
+
+    onTouchmove(x, y, e) {
+        this.onMousemove(x, y, e);
+    }
+
+    onTouchstart(x, y) {
+        this.onMousedown(x, y);
+    }
 }
 

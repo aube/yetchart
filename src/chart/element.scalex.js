@@ -3,14 +3,15 @@ import { abstractElement } from './element.js';
 
 
 export class ScaleX extends abstractElement {
-    constructor(canvas, options) {
-        super(canvas, options);
+    constructor(params) {
+        super(params);
     }
 
-    draw() {
-        if (!this.data) return;
 
-        this.init();
+    draw() {
+        // if (!this.data) return;
+
+        // this.init();
 
         let _posX = point => {
             return point * cellWidth  + this.left;
@@ -28,7 +29,7 @@ export class ScaleX extends abstractElement {
 
         let cellWidth = ctx.measureText('33 qwe.').width * 1.5;
         let labels = this.data.labels;
-        let posY = this.top + this.height + options.margin.top;
+        let posY = this.top + this.height;
         let length = labels.length;
         let amount = Math.min(length, Math.floor(this.width / cellWidth));
         let step = Math.floor(length / amount);
@@ -54,6 +55,7 @@ export class ScaleX extends abstractElement {
             ctx.fillText(txt, x, posY);
         }
 
+        // ctx.stroke();
         // let x = this.width - 10;
         // let y = 1;
         // ctx.textAlign = 'right';

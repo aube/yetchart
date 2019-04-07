@@ -3,11 +3,13 @@ export default {
         visibleArea: '20%',
         areaStartPositionAtLast: true,
         Graph: {
-            width: '100%',
-            height: '90%',
-            top: '0',
-            left: '0',
-            padding: {
+            style: {
+                width: '100%',
+                height: '90%',
+                top: '0',
+                left: '0',
+            },
+            offset: {
                 top: 10,
                 left: 0,
                 right: 0,
@@ -50,14 +52,16 @@ export default {
                     baseline: 'top',
                     align: 'center',
                     zindex: 1,
-                    margin: {
-                        top: 20
+                    offset: {
+                        bottom: -30,
                     }
                 },
                 Tooltip: {
                     elementType: 'Tooltip',
                     background: '#fff',
                     color: '#222',
+                    bordercolor: '#aaa',
+                    width: 2,
                     fontsizeValue: 14,
                     fontsizeName: 10,
                     fontsizeTitle: 12,
@@ -67,11 +71,19 @@ export default {
             },
         },
         Map: {
-            width: '100%',
-            height: '10%',
-            top: '90%',
-            left: '0',
-            background: 'transparent',
+            style: {
+                width: '100%',
+                height: '10%',
+                top: '90%',
+                left: '0',
+                background: 'transparent',
+            },
+            offset: {
+                top: 10,
+                left: 0,
+                right: 0,
+                bottom: 10,
+            },
             elementsTypes: {
                 Line: {
                     elementType: 'Line',
@@ -104,18 +116,18 @@ export default {
                 class: 'chart-legend',
             },
         },
-        // Tooltip: {
-        //     type: 'html',
-        //     titleTemplate: `<h3 class="chart-tooltip-title">%TITLE%</h3>`,
-        //     itemTemplate: `
-        //     <div class="chart-tooltip-item" style="color: %COLOR%">
-        //         <p class="chart-tooltip-item-value">%VALUE%</p>
-        //         <p class="chart-tooltip-item-name">%NAME%</p>
-        //     </div>
-        //     `,
-        //     attrs: {
-        //         class: 'chart-tooltip',
-        //     },
-        // }
+        Tooltip: {
+            type: 'html',
+            titleTemplate: `<h3 class="chart-tooltip-title">%TITLE%</h3>`,
+            itemTemplate: `
+            <div class="chart-tooltip-item" style="color: %COLOR%">
+                <p class="chart-tooltip-item-value">%VALUE%</p>
+                <p class="chart-tooltip-item-name">%NAME%</p>
+            </div>
+            `,
+            attrs: {
+                class: 'chart-tooltip',
+            },
+        }
     }
 }
