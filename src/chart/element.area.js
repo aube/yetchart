@@ -1,7 +1,7 @@
 
 import { abstractElement } from './element.js';
 
-export class Line extends abstractElement {
+export class Area extends abstractElement {
     constructor(params) {
         super(params);
     }
@@ -38,6 +38,8 @@ export class Line extends abstractElement {
             return;
         }
 
+        let $datasets = this.$data.datasets;
+        let sumValues = $datasets.sumValues;
         let dataset = this.dataset;
         let values = dataset.values;
         let length = values.length;
@@ -45,14 +47,30 @@ export class Line extends abstractElement {
         let to = Math.ceil(length * end);
         let verticalRate = this.height / (max - min) || 1;
 
-        let _posY = (value) => {
+        let _posY = value => {
+            return this.height * value + this.top;
             return this.height - value * verticalRate + this.top;
         };
 
-        this.pointsY = [];
-        this.pointsX = [];
-        for (let i = from; i < to; i++) {
-            this.pointsY.push(_posY(values[i]));
+        dataset[this.$componentName] = dataset[this.$componentName] || {};
+        dataset[this.$componentName].pointsY = [];
+        dataset[this.$componentName].beginY = [];
+
+        let pointsY = dataset[this.$componentName].pointsY;
+        let beginY = dataset[this.$componentName].beginY;
+// console.log('this.$componentName', this.$componentName, $datasets, dataset);
+// try{
+        for (let i = from, c = 0; i < to; i++) {
+            let b = dataset.index ? $datasets[dataset.index - 1][this.$componentName].pointsY[c++] : this.height + this.top;
+            // console.log('values[i] / sumValues[i]', values[i] , sumValues[i], values[i] / sumValues[i]);
+            let y = _posY(values[i] / sumValues[i]);
+            y = dataset.index ? b - y : y;
+            pointsY.push(y);
+            beginY.push(b);
+        }
+// }catch(e) {}
+        if (dataset.index === $datasets.length - 1) {
+            pointsY.fill(this.top);
         }
 
         this.start = start;
@@ -69,51 +87,44 @@ export class Line extends abstractElement {
             return point * pointWidth + pointWidth/2 * 0 + this.left ;
         };
 
-        let _drawLine = i => {
-            y = this.pointsY[i];
-            x = _posX(i);
-            ctx.lineTo(x, y);
-            // debug
-            // ctx.fillText(i, x, y + 30);
-            // ctx.fillText(this.dataset.values[i], x, y + 60);
-        }
-
+        let pointsY = this.dataset[this.$componentName].pointsY;
+        let beginY = this.dataset[this.$componentName].beginY;
         let options = this.options;
-        let y, x;
-        let length = this.pointsY.length;
+        let y, x, t;
+        let length = pointsY.length - 1;
+
 
         let pointWidth = this.width / (length - 1);
         let ctx = this.ctx;
-
 
         ctx.translate(0.5, 0.5);
         ctx.beginPath();
         ctx.lineWidth = options.width;
         ctx.lineJoin = options.join;
         ctx.strokeStyle = options.color;
+        ctx.fillStyle = options.color;
 
         let i = 0;
-        y = this.pointsY[i];
-        x = this.pointsX[i];
-        ctx.moveTo(x, y);
+        let firstY = pointsY[0];
+        let firstX = _posX(0);
+        ctx.moveTo(firstX, firstY);
 
-        for (i; i < length; _drawLine(i++)) {}
+        for (i; i < length; i++) {
+            y = pointsY[i];
+            x = _posX(i);
+            ctx.lineTo(x, y);
+        }
 
+        for (i = length - 1; i >= 0; i--) {
+            y = beginY[i];
+            x = _posX(i);
+            ctx.lineTo(x, y);
+        }
+
+        ctx.lineTo(firstX, firstY);
+        ctx.fill();
         ctx.stroke();
 
-        // Active point
-        if (this.$state.activeX) {
-            let activePoint = this.$state.activeData.activePoint;
-            let radius = 10;
-            y = this.pointsY[activePoint];
-            x = _posX(activePoint);
-
-            ctx.beginPath();
-            ctx.arc(x, y, radius, 0, 2 * Math.PI, false);
-            ctx.fillStyle = options.fillColor;
-            ctx.fill();
-            ctx.stroke();
-        }
 
         // debug
         // if (this.dataset.name === 'y0') {

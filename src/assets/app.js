@@ -111,7 +111,7 @@ setTimeout(() => {
     getJSON('assets/chart_data.json').then(result => {
         let content = document.querySelector('.content');
         result = [result[0]];
-        for (var i = 0; i < result.length; i++) {
+        for (let i = 0; i < result.length; i++) {
             // layout
             let chart = document.createElement('DIV');
             let graphContainer = document.createElement('DIV');
@@ -169,6 +169,7 @@ function dataConvertation(rawData) {
         }
         // column = column.map(c => Math.random().toFixed(2) * 1); // test
         let elementType = rawData.types[name].charAt(0).toUpperCase() + rawData.types[name].slice(1).toLowerCase();
+        elementType = 'Area';
         let ds = {
             values: column,
             name,

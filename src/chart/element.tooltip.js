@@ -71,8 +71,8 @@ export class Tooltip extends abstractElement {
         let heightName = options.fontsizeName * pixelRatio;
 
         // columns width calculate
-        for (var i = 0; i < content.length; i += columns.length) {
-            for (var ii = 0; ii < columns.length; ii++) {
+        for (let i = 0; i < content.length; i += columns.length) {
+            for (let ii = 0; ii < columns.length; ii++) {
                 let value = content[i + ii].value;
                 let name = content[i + ii].name;
 
@@ -111,7 +111,7 @@ export class Tooltip extends abstractElement {
         ctx.font = 'bold ' + _font('fontsizeTitle');
         ctx.fillText(title, rectX + padding, rectY + padding * 2);
 
-        for (var i = 0; i < content.length; i++) {
+        for (let i = 0; i < content.length; i++) {
             let x = _posX(i);
             let y = _posY(i);
 

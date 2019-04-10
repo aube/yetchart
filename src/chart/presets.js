@@ -23,7 +23,21 @@ export default {
                     join: 'round',
                     fillColor: '#fff',
                     zindex: 0,
-                }
+                },
+                Area: {
+                    elementType: 'Area',
+                    width: 5,
+                    join: 'round',
+                    fillColor: '#fff',
+                    zindex: 0,
+                },
+                Bar: {
+                    elementType: 'Bar',
+                    width: 5,
+                    join: 'round',
+                    fillColor: '#fff',
+                    zindex: 0,
+                },
             },
             elements: {
                 Grid: {
@@ -79,14 +93,14 @@ export default {
                 background: 'transparent',
             },
             offset: {
-                top: 10,
+                top: 0,
                 left: 0,
                 right: 0,
-                bottom: 10,
+                bottom: 0,
             },
             elementsTypes: {
-                Line: {
-                    elementType: 'Line',
+                Area: {
+                    elementType: 'Area',
                     width: 3,
                     join: 'round',
                     color: 'tomato',

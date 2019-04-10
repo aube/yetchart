@@ -7,7 +7,7 @@ const Utils = {
         var d = o instanceof Array ? [] : Object.create(Object.getPrototypeOf(o)),
             keys = Object.getOwnPropertyNames(o);
 
-        for (var i = 0, n = keys.length; i < n; ++i) {
+        for (let i = 0, n = keys.length; i < n; ++i) {
             var key = keys[i];
             Object.defineProperty(d, key, Object.getOwnPropertyDescriptor(o, key));
         }
@@ -59,7 +59,7 @@ const Utils = {
         }
         let len = arr.length;
         let delta = Array(len);
-        for (var i = 0; i < len; i++) {
+        for (let i = 0; i < len; i++) {
             delta[i] = Utils.isDef(base[i]) ? arr[i] - base[i] : 0;
         }
         return delta;
@@ -91,7 +91,7 @@ const Utils = {
 
         let result = [];
         let len = arr.length;
-        for (var i = 0; i < len; i++) {
+        for (let i = 0; i < len; i++) {
             result[i] = (base[i] || 0) + arr[i] * progress;
         }
         return result;

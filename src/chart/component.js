@@ -1,5 +1,7 @@
 
 import { Line } from './element.line.js';
+import { Area } from './element.area.js';
+import { Bar } from './element.bar.js';
 import { Grid } from './element.grid.js';
 import { ScaleY } from './element.scaley.js';
 import { ScaleX } from './element.scalex.js';
@@ -7,7 +9,7 @@ import { Tooltip } from './element.tooltip.js';
 
 import Utils from './utils.js';
 
-const availableElements = {Line, Grid, ScaleY, ScaleX, Tooltip};
+const availableElements = {Line, Grid, ScaleY, ScaleX, Tooltip, Area};
 
 export class abstractComponent {
     constructor(chart, options) {
@@ -126,7 +128,7 @@ export class abstractComponent {
             let typeOptions = elementsTypesSettings[type];
             let mergedOptions = Utils.objMerge({}, typeOptions, datasetOptions);
             mergedOptions.offset = Utils.objSum(mergedOptions.offset, options.offset);
-// console.log('mergedOptions.offset, options.offset', mergedOptions.offset, options.offset);
+            mergedOptions.zindex = (mergedOptions.zindex || 0) + dataset.index / 100;
             
             let element = this._addElement(type, mergedOptions);
             element.dataset = dataset;
@@ -134,9 +136,18 @@ export class abstractComponent {
     }
 
     createDataElements() {
-        this.$data.datasets.forEach(dataset => {
-            this.createDataElement(dataset);
-        });
+        let datasets = this.$data.datasets;
+        let sumValues = [];
+
+        for (let i = 0; i < datasets.length; i++) {
+            datasets[i].index = i;
+            this.createDataElement(datasets[i]);
+            
+            for (let v = 0; v < datasets[i].values.length; v++) {
+                sumValues[v] = (sumValues[v] || 0) + datasets[i].values[v];
+            }
+        }
+        this.$data.datasets.sumValues = sumValues;
     }
 
     createElements() {
@@ -163,6 +174,7 @@ export class abstractComponent {
         });
 
         this.elements.sort((a, b) => a.options.zindex >= b.options.zindex ? 1 : -1);
+        console.log('this.elements', this.constructor.name, this.elements);
     }
 
     _addElement(elementType, options, data) {
@@ -176,6 +188,7 @@ export class abstractComponent {
         element.$data = this.$data;
         element.$state = this.$state;
         element.$componentState = this.$componentState;
+        element.$componentName = this.constructor.name;
 
         this.elements.push(element);
         return element;
