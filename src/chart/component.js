@@ -137,18 +137,13 @@ export class abstractComponent {
 
     createDataElements() {
         let datasets = this.$data.datasets;
-        let sumValues = [];
 
         for (let i = 0; i < datasets.length; i++) {
             datasets[i].index = i;
             this.createDataElement(datasets[i]);
-            
-            for (let v = 0; v < datasets[i].values.length; v++) {
-                sumValues[v] = (sumValues[v] || 0) + datasets[i].values[v];
-            }
         }
-        this.$data.datasets.sumValues = sumValues;
     }
+
 
     createElements() {
         // this.elements = [];

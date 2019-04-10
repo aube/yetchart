@@ -26,51 +26,70 @@ export class Area extends abstractElement {
     }
 
     calculate() {
-        let start = this.$componentState.start || this.$state.start;
-        let end = this.$componentState.end || this.$state.end;
-        let min = this.$componentState.min;
-        let max = this.$componentState.max;
 
-        if (
-            this.start === start && this.end === end &&
-            this.max === max && this.min === min
-        ) {
-            return;
-        }
+        let _posY = value => {
+            // values in percents
+            return this.height * value + this.top;
+
+            // absolute values
+            return this.height - value * verticalRate + this.top;
+        };
+
+        let $componentState = this.$componentState;
+        let start = $componentState.start || this.$state.start;
+        let end = $componentState.end || this.$state.end;
+        let min = $componentState.min;
+        let max = $componentState.max;
 
         let $datasets = this.$data.datasets;
         let sumValues = $datasets.sumValues;
         let dataset = this.dataset;
+        let $componentName = this.$componentName;
+        dataset[$componentName] = dataset[$componentName] || {};
+
+        let datasetScope = dataset[$componentName];
         let values = dataset.values;
         let length = values.length;
         let from = Math.floor(length * start);
         let to = Math.ceil(length * end);
         let verticalRate = this.height / (max - min) || 1;
 
-        let _posY = value => {
-            return this.height * value + this.top;
-            return this.height - value * verticalRate + this.top;
-        };
+        datasetScope.pointsY = [];
+        datasetScope.beginY = [];
 
-        dataset[this.$componentName] = dataset[this.$componentName] || {};
-        dataset[this.$componentName].pointsY = [];
-        dataset[this.$componentName].beginY = [];
+        let pointsY = datasetScope.pointsY;
+        let beginY = datasetScope.beginY;
+        let lastVisibleIndex = false;
+        let visibleNumber = 0;
+        let prevDataset = false;
+        $datasets.forEach(ds => {
+            if (!ds.hidden) {
+                lastVisibleIndex = ds.index;
+                visibleNumber++;
+                if (ds.index < dataset.index) {
+                    prevDataset = ds;
+                }
+            }
+        });
 
-        let pointsY = dataset[this.$componentName].pointsY;
-        let beginY = dataset[this.$componentName].beginY;
-// console.log('this.$componentName', this.$componentName, $datasets, dataset);
-// try{
         for (let i = from, c = 0; i < to; i++) {
-            let b = dataset.index ? $datasets[dataset.index - 1][this.$componentName].pointsY[c++] : this.height + this.top;
-            // console.log('values[i] / sumValues[i]', values[i] , sumValues[i], values[i] / sumValues[i]);
+            let b = prevDataset ? prevDataset[$componentName].pointsY[c++] : this.height + this.top;
             let y = _posY(values[i] / sumValues[i]);
             y = dataset.index ? b - y : y;
             pointsY.push(y);
             beginY.push(b);
         }
-// }catch(e) {}
-        if (dataset.index === $datasets.length - 1) {
+
+        // if ($componentName == 'Graph') {
+        //     console.log('po',dataset.name, pointsY);
+        //     console.log('bo',dataset.name, beginY);
+        // }
+
+        if (lastVisibleIndex === dataset.index) {
             pointsY.fill(this.top);
+            if (visibleNumber === 1) {
+                beginY.fill(this.height + this.top);
+            }
         }
 
         this.start = start;

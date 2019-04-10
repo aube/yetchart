@@ -40,6 +40,8 @@ export default class Chart {
 
     set data(data) {
         this.$data = data;
+        this.calcVisibleDatasetsAmount();
+        this.calcSumDatasetsValues();
         this.components.forEach(component => {
             component.setData(this.$data);
         });
@@ -144,8 +146,32 @@ export default class Chart {
     }
 
     toggleDataset(index) {
-        this.$data.datasets[index].hidden = !this.$data.datasets[index].hidden;
+        let datasets = this.$data.datasets;
+        datasets[index].hidden = !datasets[index].hidden;
+        this.calcVisibleDatasetsAmount();
+        this.calcSumDatasetsValues();
         this.callComponents(['onToggleDataset']);
+    }
+
+    calcVisibleDatasetsAmount() {
+        let datasets = this.$data.datasets;
+        datasets.visibles = 0;
+        datasets.forEach(ds => {
+            datasets.visibles += ds.hidden ? 0 : 1;
+        });
+    }
+
+    calcSumDatasetsValues() {
+        let datasets = this.$data.datasets;
+        let sumValues = [];
+
+        for (let d = 0; d < datasets.length; d++) {
+            if (datasets[d].hidden) continue;
+            for (let v = 0; v < datasets[d].values.length; v++) {
+                sumValues[v] = (sumValues[v] || 0) + datasets[d].values[v];
+            }
+        }
+        datasets.sumValues = sumValues;
     }
 
     onScreenResize() {
