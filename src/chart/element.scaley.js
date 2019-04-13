@@ -14,19 +14,21 @@ export class ScaleY extends abstractElement {
 
         // this.init();
         let _posY = point => {
-            return this.height - point * cellHeidht  + this.top;
+            return height - point * cellHeidht  + this.top;
         };
 
-        let options = this.options;
         let ctx = this.ctx;
+        let options = this.options;
         let max = this.$componentState.max;
         let min = this.$componentState.min;
         let labelsAmount = options.labelsAmount;
         let scaleYRate = this.scaleYRate || 1;
-        let cellHeidht = this.height / labelsAmount * scaleYRate;
+        let offsetTop = this.top;
+        let height = this.height - offsetTop - this.bottom;
+        let cellHeidht = height / labelsAmount * scaleYRate;
         let step = (max - min) / labelsAmount;
-        let x = this.left
-        
+        let x = this.left;
+
         ctx.textAlign = 'left';
         ctx.textBaseline = options.baseline;
         ctx.font = options.fontsize * this.pixelRatio + 'px ' + options.fontname;

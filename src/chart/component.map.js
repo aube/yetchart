@@ -16,7 +16,7 @@ export class Map extends abstractComponent {
 
     constructor(chart, options) {
         super(chart, options);
-        this.name = 'Map';
+        // this.name = 'Map';
         this.data = {
             datasets: []
         };
@@ -25,22 +25,21 @@ export class Map extends abstractComponent {
 
 
     prepareData() {
-        let globalMin = Infinity;
-        let globalMax = -Infinity;
 
-        this.$data.datasets.forEach(dataset => {
-            if (!dataset.hidden) {
-                let values = this.dataCompression(dataset.values, this.width * this.pixelRatio);;
-                let mm = Object.assign({}, this.getMinMax(values));
-                globalMin = Math.min(mm.min, globalMin);
-                globalMax = Math.max(mm.max, globalMax);
-            }
-        });
-        
-        this.$componentState.min = globalMin;
-        this.$componentState.max = globalMax;
-        this.$componentState.start = 0.0001;
-        this.$componentState.end = 1;
+        let labels = this.$data.labels;
+        let $state = this.$state;
+        let $componentState = this.$componentState;
+
+        let {min, max} = this.getMinMax(true);
+
+        $state.max = max;
+        $state.min = min;
+        $componentState.max = max;
+        $componentState.min = min;
+
+        $componentState.start = 0;
+        $componentState.end = 1;
+        $componentState.fixedSize = true;
     }
 
     /**

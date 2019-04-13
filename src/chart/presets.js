@@ -5,14 +5,14 @@ export default {
         Graph: {
             style: {
                 width: '100%',
-                height: '90%',
-                top: '0',
+                height: '80%',
+                top: '10%',
                 left: '0',
             },
             offset: {
                 top: 10,
-                left: 0,
-                right: 0,
+                left: 15,
+                right: 15,
                 bottom: 100,
             },
             background: 'transparent',
@@ -23,6 +23,10 @@ export default {
                     join: 'round',
                     fillColor: '#fff',
                     zindex: 0,
+                    // offset: {
+                    //     left: 15,
+                    //     right: 15,
+                    // },
                 },
                 Area: {
                     elementType: 'Area',
@@ -67,29 +71,29 @@ export default {
                     align: 'center',
                     zindex: 1,
                     offset: {
-                        bottom: -30,
+                        bottom: 80
                     }
                 },
-                Tooltip: {
-                    elementType: 'Tooltip',
-                    background: '#fff',
-                    color: '#222',
-                    bordercolor: '#aaa',
-                    width: 2,
-                    fontsizeValue: 14,
-                    fontsizeName: 10,
-                    fontsizeTitle: 12,
-                    fontname: 'Arial',
-                    zindex: 2,
-                },
+                // Tooltip: {
+                //     elementType: 'Tooltip',
+                //     background: '#fff',
+                //     color: '#222',
+                //     bordercolor: '#aaa',
+                //     width: 2,
+                //     fontsizeValue: 14,
+                //     fontsizeName: 10,
+                //     fontsizeTitle: 12,
+                //     fontname: 'Arial',
+                //     zindex: 2,
+                // },
             },
         },
         Map: {
             style: {
-                width: '100%',
+                width: '92%',
                 height: '10%',
                 top: '90%',
-                left: '0',
+                left: '4%',
                 background: 'transparent',
             },
             offset: {
@@ -99,8 +103,20 @@ export default {
                 bottom: 0,
             },
             elementsTypes: {
+                Line: {
+                    elementType: 'Line',
+                    width: 3,
+                    join: 'round',
+                    color: 'tomato',
+                },
                 Area: {
                     elementType: 'Area',
+                    width: 3,
+                    join: 'round',
+                    color: 'tomato',
+                },
+                Bar: {
+                    elementType: 'Bar',
                     width: 3,
                     join: 'round',
                     color: 'tomato',
@@ -109,39 +125,69 @@ export default {
         },
         Scroll: {
             type: 'html',
-            inheritOptions: 'Map',
+            style: {
+                width: '92%',
+                height: '10%',
+                top: '90%',
+                left: '4%',
+                background: 'transparent',
+            },
             template: `
             <div class="chart-scroll">
                 <div class="chart-scroll-bar"></div>
+                <div class="chart-scroll-bar chart-scroll-bar-right"></div>
                 <div class="chart-scroll-carret"></div>
-                <div class="chart-scroll-bar"></div>
             </div>`,
         },
         Legend: {
             type: 'html',
+            style: {
+                width: '92%',
+                marginLeft: '4%',
+                position: 'relative',
+            },
             outside: true,
             itemTemplate: `
-            <div class="chart-legend-item">
-                <i class="icon" style="background-color: %COLOR%"></i>
-                <span>%TEXT%</span>
+            <div class="chart-legend-item" style="--active-color: %COLOR%;">
+                <i class="icon"></i>
+                <span class="text">%TEXT%</span>
             </div>
             `,
             attrs: {
                 class: 'chart-legend',
             },
         },
-        Tooltip: {
+        Header: {
+            style: {
+                width: '94%',
+                height: '10%',
+                top: '0',
+                left: '3%',
+            },
             type: 'html',
-            titleTemplate: `<h3 class="chart-tooltip-title">%TITLE%</h3>`,
+            template: `
+            <div class="chart-header">
+                <div class="chart-header-title">title</div>
+                <div class="chart-header-state">Zoom Out</div>
+                <div class="chart-header-descript">descript</div>
+            </div>`,
+        },
+        Tooltip: {
+            style: {
+                top: '10%',
+            },
+            type: 'html',
+            template: `
+            <div class="chart-tooltip">
+                <h3 class="chart-tooltip-title">%TITLE%</h3>
+                %ITEMS%
+            </div>`,
             itemTemplate: `
-            <div class="chart-tooltip-item" style="color: %COLOR%">
-                <p class="chart-tooltip-item-value">%VALUE%</p>
+            <div class="chart-tooltip-item" style="--active-color: %COLOR%;">
                 <p class="chart-tooltip-item-name">%NAME%</p>
+                <p class="chart-tooltip-item-value">%VALUE%</p>
             </div>
             `,
-            attrs: {
-                class: 'chart-tooltip',
-            },
         }
     }
 }

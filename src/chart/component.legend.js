@@ -5,7 +5,7 @@ export class Legend extends abstractComponent {
 
     constructor(chart, options) {
         super(chart, options);
-        this.name = 'Legend';
+        // this.name = 'Legend';
     }
 
     setSizes() {}
@@ -26,7 +26,7 @@ export class Legend extends abstractComponent {
         this.$data.datasets.forEach(dataset => {
             this.template += this.options.itemTemplate
                 .replace('%TEXT%', dataset.name)
-                .replace('%COLOR%', dataset.options.color);
+                .replace(/%COLOR%/g, dataset.options.color);
         });
     }
 

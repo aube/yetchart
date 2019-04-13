@@ -1,18 +1,54 @@
+
+.yetchart-Map {
+    border-radius: 5px;
+    overflow: hidden;
+    position: absolute;
+}
 .chart-scroll {
+    position: absolute;
+    --radius: 5px;
     height: 100%;
     width: 100%;
-    display: flex;
-    opacity: 0;
+    display: block;
     .chart-scroll-bar {
+        opacity: 0.6;
         height: 100%;
-        background: #f5f9fb;
+        background: #E2EEF9;
+        position: absolute;
+        left: 0;
+        border-top-left-radius: var(--radius);
+        border-bottom-left-radius: var(--radius);
+    }
+    .chart-scroll-bar-right {
+        left: auto;
+        right: 0;
+        border-radius: none;
+        border-top-right-radius: var(--radius);
+        border-bottom-right-radius: var(--radius);
     }
     .chart-scroll-carret {
         height: calc(100% - 4px);
         background: transparent;
-        border: 2px #ddeaf3 solid;
-        border-left-width: 10px;
-        border-right-width: 10px;
+        border: 2px #c0d1e1 solid;
+        border-left-width: 14px;
+        border-right-width: 14px;
+        border-radius: var(--radius);
+        position: absolute;
+        // z-index: 1;
+        &:after, &:before {
+            content: '';
+            position: absolute;
+            display: block;
+            border-radius: 2px;
+            width: 2px;
+            height: 30%;
+            right: -8px;
+            top: 40%;
+            background-color: #fff;
+        }
+        &:before {
+            left: -8px;
+            right: auto;
+        }
     }
 }
-

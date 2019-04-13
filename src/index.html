@@ -21,7 +21,44 @@
         <span class="today" onclick="toggleNightMode()">Switch to Day Mode</span>
     </div>
 
+    <script src="assets/helpers.js"></script>
+    <script src="assets/settings.js"></script>
+    
     <!-- Charts activation and Day/Night mode toggle -->
-    <script src="assets/app.js"></script>
+    <script>
+        const activeCharts = [];
+
+        settings.forEach(chartSettings => {
+            let content = document.querySelector('.content');
+            let chart = document.createElement('DIV');
+            let graphContainer = document.createElement('DIV');
+            chart.className = 'chart';
+            graphContainer.className = 'graph-container';
+            chart.appendChild(graphContainer);
+            content.appendChild(chart);
+            
+            let settings = chartSettings.default || {};
+            objMerge(settings, chartSettings.day);
+            settings.element = graphContainer;
+
+            // if (chartSettings.zoom) {
+            //     settings.zoomFn = zoom;
+            // }
+            
+            let Chart = new $Chart(settings);
+
+            getJSON(chartSettings.data).then(result => {
+                Chart.data = dataConvertation(result);
+                activeCharts.push(Chart);
+            });
+        });
+
+        // setTimeout(() => {
+        // });
+
+        // setTimeout(() => {
+        //     console.log('settings', settings);
+        // })
+    </script>
 </body>
 </html>

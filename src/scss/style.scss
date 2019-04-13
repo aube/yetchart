@@ -1,5 +1,7 @@
 @import 'legend.scss';
 @import 'scroll.scss';
+@import 'header.scss';
+@import 'tooltip.scss';
 @import 'night-mode.scss';
 
 @mixin mq($width, $type: min) {
@@ -42,12 +44,13 @@ body {
     max-width: 56em;
     padding: 1em 0;
     font-family: arial;
+    -webkit-tap-highlight-color: transparent;
 }
 
 .content {
     display: flex;
     flex-flow: wrap;
-    margin: 0 1em 1em;
+    margin: 0 0 1em;
 
     .chart {
         width: calc(50% - 2em);

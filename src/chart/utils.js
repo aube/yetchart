@@ -52,7 +52,6 @@ const Utils = {
         return base;
     },
 
-    // TODO try to use reduce
     arrDelta: function(base, arr) {
         if (!base) {
             return arr.slice();
@@ -65,7 +64,6 @@ const Utils = {
         return delta;
     },
 
-    // TODO try to use reduce
     objDelta: function(base, obj, keys) {
         let delta = {};
         keys = keys || Object.keys(obj);
@@ -82,7 +80,6 @@ const Utils = {
         return delta;
     },
 
-    // TODO try to use reduce
     arrSum: function(base, arr = [], progress = 1) {
         // console.log('bap', base, arr, progress);
         if (!base) {
@@ -97,7 +94,6 @@ const Utils = {
         return result;
     },
 
-    // TODO try to use reduce
     objSum: function(base = {}, obj = {}, progress = 1) {
         let result = {};
         Object.keys(obj).forEach(key => {
@@ -138,8 +134,10 @@ const Utils = {
                 },
             };
 
-        let handle = function() {
-            stop = true;
+        let handle = {
+            stop() {
+                stop = true;
+            }
         }
 
         if (options.timing) {
@@ -208,21 +206,21 @@ const Utils = {
      * @param {Number}    to      [timeout ms]
      * @param {any}       context [this of executed function]
      */
-    // throttle: function(fn, to = 200, context = null) {
-    //     let args = Array.prototype.slice.call(arguments, 2);
+    throttle: function(fn, to = 200, context = null) {
+        let args = Array.prototype.slice.call(arguments, 2);
 
-    //     if (fn.throttle) {
-    //         clearTimeout(fn.throttle);
-    //     }
+        if (fn.throttle) {
+            clearTimeout(fn.throttle);
+        }
 
-    //     return new Promise((resolve, reject) => {
-    //         fn.throttle = setTimeout(() => {
-    //             fn.throttle = null;
-    //             let result = fn.call(...args);
-    //             resolve(result);
-    //         }, to);
-    //     });
-    // }
+        return new Promise((resolve, reject) => {
+            fn.throttle = setTimeout(() => {
+                fn.throttle = null;
+                let result = fn.call(...args);
+                resolve(result);
+            }, to);
+        });
+    }
 }
 
 export default Utils;

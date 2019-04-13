@@ -14,27 +14,33 @@ export class ScaleX extends abstractElement {
         // this.init();
 
         let _posX = point => {
-            return point * cellWidth  + this.left;
+            return point * cellWidth  + offsetLeft;
         };
 
         let _txt = n => {
             let label = labels[n];
-            return options.labelsFormat ? options.labelsFormat(label) : label;
+            return options.labelsFormat ? options.labelsFormat(label, this.$state.zoom) : label;
         };
 
-        let options = this.options;
         let ctx = this.ctx;
-
+        let options = this.options;
         ctx.font = options.fontsize * this.pixelRatio + 'px ' + options.fontname;
 
+// console.log('options', options);
+        // let offsetTop = this.top;
+        let offsetLeft = this.left;
+        let posY = this.height - this.bottom;
+        let width = this.width - offsetLeft - this.right;
+
         let cellWidth = ctx.measureText('33 qwe.').width * 1.5;
-        let labels = this.data.labels;
-        let posY = this.top + this.height;
+        let labels = this.$data.labels;
+        // console.log('labels', labels);
+        // let posY = offsetTop + height;
         let length = labels.length;
-        let amount = Math.min(length, Math.floor(this.width / cellWidth));
+        let amount = Math.min(length, Math.floor(width / cellWidth));
         let step = Math.floor(length / amount);
 
-        cellWidth = this.width / amount;
+        cellWidth = width / amount;
         ctx.textBaseline = options.baseline;
         ctx.fillStyle = options.color;
 
@@ -44,7 +50,7 @@ export class ScaleX extends abstractElement {
 
         // last label
         ctx.textAlign = 'right';
-        ctx.fillText(_txt(length - 1), this.width, posY);
+        ctx.fillText(_txt(length - 1), width, posY);
 
         ctx.textAlign = options.align;
 

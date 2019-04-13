@@ -2,49 +2,58 @@
 import Utils from './utils.js';
 import Presets from './presets.js';
 
+import { Tooltip } from './component.tooltip.js';
+import { Header } from './component.header.js';
 import { Graph } from './component.graph.js';
 import { Map } from './component.map.js';
 import { Scroll } from './component.scroll.js';
 import { Legend } from './component.legend.js';
 
 
-const availableComponents = {Graph, Map, Scroll, Legend};
+const availableComponents = {Graph, Map, Scroll, Tooltip, Header, Legend};
 
 export default class Chart {
 
     constructor(options, preset) {
-        this.components = [];
-
         const defOpt = Presets[preset] || Presets.default;
 
         this._options = Utils.objMerge({}, defOpt, options, true);
 
         this.$state = {
-            start: 0,
-            end: .1,
+            start: .9,
+            end: 1,
         };
+        // this.$state = {
+        //     start: .0,
+        //     end: .01,
+        // };
 
         this.$methods = {
             setAreaPosition: this.setAreaPosition.bind(this),
             setAreaSize: this.setAreaSize.bind(this),
             setActivePoint: this.setActivePoint.bind(this),
+            updateAreaSize: this.updateAreaSize.bind(this),
             toggleDataset: this.toggleDataset.bind(this),
+            zoomToggle: this.zoomToggle.bind(this),
         };
 
         this.setContainer(options && options.element);
-        this.createComponents();
-
 
         window.addEventListener('resize', () => {this.onScreenResize();});
     }
 
     set data(data) {
+        let $state = this.$state;
+        $state.length = data.labels.length;
+        $state.from = Math.ceil($state.start * ($state.length - 1));
+        $state.to = Math.floor($state.end * ($state.length - 1));
+
         this.$data = data;
+        this.callComponents(['destroy']);
+        this.createComponents();
         this.calcVisibleDatasetsAmount();
         this.calcSumDatasetsValues();
-        this.components.forEach(component => {
-            component.setData(this.$data);
-        });
+        this.callComponents(['onSetData']);
     }
 
     set options(options) {
@@ -58,14 +67,16 @@ export default class Chart {
     }
 
     createComponents() {
+        // console.log('this.components', this.components);
+        // (this.components || []).forEach(component => component.destroy1);
+        this.components = [];
         Object.keys(this._options).forEach(componentName => {
             if (availableComponents[componentName]) {
 
                 let options = this._options[componentName];
                 let inheritedOptions = this._options[options.inheritOptions] || {};
-                if (inheritedOptions.elements) {
-                    delete inheritedOptions.elements;
-                }
+                delete inheritedOptions.elements;
+                delete inheritedOptions.attrs;
                 options = Utils.objMerge({}, inheritedOptions, options);
                 this.components.push(new availableComponents[componentName](this, options));
             }
@@ -73,7 +84,7 @@ export default class Chart {
     }
 
     callComponents(methods) {
-        this.components.forEach(component => {
+        (this.components || []).forEach(component => {
             methods.forEach(method => component[method] && component[method]());
         });
     }
@@ -101,38 +112,34 @@ export default class Chart {
 
 
     setAreaPosition(x) {
-        let w = this.$state.end - this.$state.start;
-
-        // autoscroll
-        if (x > 1 || x < 0) {
-            x = x > 1 ? x - 1 : x;
-            x = this._start + w / 2 + x / 10
-        }
-
+        let $state = this.$state;
+        let w = $state.end - $state.start;
         let _start = Math.min(Math.max(x - w / 2, 0), 1 - w);
         let _end = _start + w;
-        _start = +_start.toFixed(3);
-        _end = +_end.toFixed(3);
 
-        this.$state.start = _start;
-        this.$state.end = _end;
-        this.$state.resize = false;
+        $state.start = +_start.toFixed(3);
+        $state.end = +_end.toFixed(3);
 
-        this.callComponents(['onUpdatePosition']);
+        this.updateAreaSize();
     }
 
     setAreaSize(x, type) {
-        let minimumSize = .07;
+        let $state = this.$state;
+        let minimumSize = .01;
 
         if (type === 'start') {
-            this.$state.start = +Math.min(Math.max(x, 0), this.$state.end - minimumSize).toFixed(3);
-            this.$state.drawReverse = true;
+            $state.start = +Math.min(Math.max(x, 0), $state.end - minimumSize).toFixed(3);
         } else {
-            this.$state.end = +Math.max(Math.min(x, 1), this.$state.start + minimumSize).toFixed(3);
-            this.$state.drawReverse = false;
+            $state.end = +Math.max(Math.min(x, 1), $state.start + minimumSize).toFixed(3);
         }
-        this.$state.resize = true;
 
+        this.updateAreaSize();
+    }
+
+    updateAreaSize() {
+        let $state = this.$state;
+        $state.from = Math.ceil($state.start * ($state.length - 1));
+        $state.to = Math.floor($state.end * ($state.length - 1));
         this.callComponents(['onUpdatePosition']);
     }
 
@@ -149,16 +156,17 @@ export default class Chart {
         let datasets = this.$data.datasets;
         datasets[index].hidden = !datasets[index].hidden;
         this.calcVisibleDatasetsAmount();
-        this.calcSumDatasetsValues();
+        if (this.$data.stacked)
+            this.calcSumDatasetsValues();
         this.callComponents(['onToggleDataset']);
     }
 
     calcVisibleDatasetsAmount() {
-        let datasets = this.$data.datasets;
-        datasets.visibles = 0;
-        datasets.forEach(ds => {
-            datasets.visibles += ds.hidden ? 0 : 1;
+        let visiblesDatasets = 0;
+        this.$data.datasets.forEach(ds => {
+            visiblesDatasets += ds.hidden ? 0 : 1;
         });
+        this.$state.visiblesDatasets = visiblesDatasets;
     }
 
     calcSumDatasetsValues() {
@@ -171,8 +179,54 @@ export default class Chart {
                 sumValues[v] = (sumValues[v] || 0) + datasets[d].values[v];
             }
         }
-        datasets.sumValues = sumValues;
+        this.$data.sumValues = sumValues;
     }
+
+    zoomToggle() {
+        this.zoom = !this.zoom;
+        if (this.zoom) {
+            this.zoomInFn();
+        } else {
+            this.zoomOutFn();
+        }
+        // console.log('123', this._options);
+    }
+
+    zoomInFn(ts = 1542326400000) {
+        this.callComponents(['beforeZoomIn']);
+        setTimeout(()=>{
+            let opt = this._options;
+            this._state = this.$state;
+            this._data = this.$data;
+            
+            opt.zoomData(opt.zoomUrl, ts).then(data => {
+                this.$state = {
+                    start: 0,
+                    end: 1,
+                    zoom: true,
+                };
+                this.data = data;
+            });
+        }, 200);
+        setTimeout(()=>{
+            this.callComponents(['onZoomIn']);
+        }, 400);
+
+        // const Chart = this._chart;
+        // const url = this.options.zoomUrl + '2018-09/22.json';
+
+        // getJSON(url).then(result => {
+        //     Chart.$state.start = .4;
+        //     Chart.$state.end = .5;
+        //     Chart.data = dataConvertation(result);
+        // });
+    }
+
+    zoomOutFn(e) {
+        this.$state = this._state;
+        this.data = this._data;
+    }
+
 
     onScreenResize() {
         this.callComponents(['onScreenResize']);

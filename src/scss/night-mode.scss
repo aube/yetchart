@@ -1,7 +1,12 @@
 
+body {
+    background-color: #fff;
+    transition: background-color .2s;
+}
 .night-mode {
     color: #fff;
     background-color: #242f3e;
+
     .chart-scroll{
         .chart-scroll-bar {
             background: #1f2a38;

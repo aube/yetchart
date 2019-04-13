@@ -5,16 +5,17 @@ import { Bar } from './element.bar.js';
 import { Grid } from './element.grid.js';
 import { ScaleY } from './element.scaley.js';
 import { ScaleX } from './element.scalex.js';
-import { Tooltip } from './element.tooltip.js';
+// import { Tooltip } from './element.tooltip.js';
 
 import Utils from './utils.js';
 
-const availableElements = {Line, Grid, ScaleY, ScaleX, Tooltip, Area};
+const availableElements = {Line, Grid, ScaleY, ScaleX, Area, Bar};
 
 export class abstractComponent {
     constructor(chart, options) {
         // console.log('options', options);
         this._chart = chart;
+        this.name = this.constructor.name;
         
         this.$state = chart.$state;
         this.$methods = chart.$methods;
@@ -22,9 +23,10 @@ export class abstractComponent {
         this.options = options;
         this.container = chart.container;
         this.elements = [];
-        this.datasets = [];
+        // this.datasets = [];
         this.pixelRatio = 1;
-        this.dataMargin = .2;
+        // this.dataMargin = .2;
+        this.eventsList = ['Mouseup', 'Touchend', 'Mousemove', 'Touchmove', 'Mousedown', 'Touchstart', 'Click'];
 
         let parent = this.options.outside ? this.container.parentNode : this.container;
         if (options.type === 'html') {
@@ -37,6 +39,7 @@ export class abstractComponent {
         }
 
         this.component = this.canvas || this.div;
+        this.component.classList.add('yetchart-' + this.constructor.name);
 
         if (this.options.attrs) {
             Object.keys(this.options.attrs).forEach(key => {
@@ -44,10 +47,10 @@ export class abstractComponent {
             });
         }
         if (this.options.style) {
+            this.component.style.position = 'absolute';
             Object.keys(this.options.style).forEach(key => {
                 this.component.style[key] = this.options.style[key];
             });
-            this.component.style.position = 'absolute';
         }
 
         this.setSizes();
@@ -56,7 +59,6 @@ export class abstractComponent {
 
 
     setAreaPosition(x, animate) {
-
         x = Math.max(Math.min(1, x), 0);
         this.$methods.setAreaPosition(x, animate);
     }
@@ -66,14 +68,6 @@ export class abstractComponent {
         this.$methods.setAreaSize(x, mode);
     }
 
-    setData(data) {
-        this.$data = data;
-        // console.log('setData on', this.name);
-        this.createDataElements();
-        this.prepareData();
-        this.createElements();
-        this.render(true);
-    }
 
     updateOptions(options = {}) {
         this.options = Utils.objMerge({}, this.options, options, true);
@@ -88,16 +82,21 @@ export class abstractComponent {
     }
 
     setSizes() {
-        let containerHeight = this.container.offsetHeight;
-        let containerWidth = this.container.offsetWidth;
+        let height = this.component.offsetHeight;
+        let width = this.component.offsetWidth;
 
-        this.width = this.component.offsetWidth;
-        this.height = this.component.offsetHeight;
+        this.width = width;
+        this.height = height;
+        this.$state.width = this.container.offsetWidth;
+        this.$state.height = this.container.offsetWidth;
+
         if (this.canvas) {
-            this.canvas.setAttribute('width', parseInt(this.width * this.pixelRatio));
-            this.canvas.setAttribute('height', parseInt(this.height * this.pixelRatio));
+            this.canvas.setAttribute('width', parseInt(width * this.pixelRatio));
+            this.canvas.setAttribute('height', parseInt(height * this.pixelRatio));
             this.canvas.setAttribute('ratio', parseInt(this.pixelRatio));
         }
+
+        // console.log('this.width', this.constructor.name, this.width);
 
         this.callElements(['setSizes']);
     }
@@ -122,12 +121,14 @@ export class abstractComponent {
     createDataElement(dataset) {
         let datasetOptions = dataset.options;
         let type = datasetOptions.elementType;
-        let options = this.options;
-        let elementsTypesSettings = options.elementsTypes || {};
-        if (elementsTypesSettings[type] && availableElements[type]) {
-            let typeOptions = elementsTypesSettings[type];
-            let mergedOptions = Utils.objMerge({}, typeOptions, datasetOptions);
-            mergedOptions.offset = Utils.objSum(mergedOptions.offset, options.offset);
+        let componentOptions = this.options;
+        let elementsTypesOptions = componentOptions.elementsTypes || {};
+
+        if (elementsTypesOptions[type] && availableElements[type]) {
+            let elsTypeOptions = elementsTypesOptions[type];
+
+            let mergedOptions = Utils.objMerge({}, componentOptions, elsTypeOptions, datasetOptions, true);
+            // fix sort by zindex
             mergedOptions.zindex = (mergedOptions.zindex || 0) + dataset.index / 100;
             
             let element = this._addElement(type, mergedOptions);
@@ -150,6 +151,7 @@ export class abstractComponent {
 
         let elsTypes = this.options.elementsTypes || {};
         let els = this.options.elements;
+        let componentOptions = this.options;
 
         // predefault elements like Grid
         Object.keys(els || {}).forEach(el => {
@@ -160,8 +162,7 @@ export class abstractComponent {
             if (availableElements[elementType]) {
                 let elsTypeOptions = elsTypes[elOptions.name || el];
 
-                let mergedOptions = Utils.objMerge({}, elsTypeOptions, elOptions);
-                mergedOptions.offset = Utils.objSum(mergedOptions.offset, this.options.offset);
+                let mergedOptions = Utils.objMerge({}, componentOptions, elsTypeOptions, elOptions, true);
 
                 let element = this._addElement(elementType, mergedOptions);
                 element.data = this.data;
@@ -169,7 +170,6 @@ export class abstractComponent {
         });
 
         this.elements.sort((a, b) => a.options.zindex >= b.options.zindex ? 1 : -1);
-        console.log('this.elements', this.constructor.name, this.elements);
     }
 
     _addElement(elementType, options, data) {
@@ -177,6 +177,7 @@ export class abstractComponent {
         let element =  new availableElements[elementType]({
             canvas: this.canvas,
             ctx: this.ctx,
+            component: this,
             options
         });
         element.type = elementType;
@@ -184,7 +185,6 @@ export class abstractComponent {
         element.$state = this.$state;
         element.$componentState = this.$componentState;
         element.$componentName = this.constructor.name;
-
         this.elements.push(element);
         return element;
     }
@@ -214,9 +214,8 @@ export class abstractComponent {
         let step = data.length / maxLength;
 
         if (maxLength >= data.length) {
-            return data.slice();
+            return data;
         }
-
 
         for (let i = 0, ii = maxLength; i < ii; i++) {
             let d = Math.min(Math.round(i * step), data.length - 1);
@@ -268,27 +267,81 @@ export class abstractComponent {
             return Math.floor(number * n) / n;
         }
 
-        if (max > min * 2) {
-            min = 0;
-        } else {
-            min = _down(min);
+        function _flat(number) {
+            let n = _n(number);
+            return Math.round(number * n) / n;
         }
-
-        // max *= 1.05;
-
-        let step = (max - min) / amount;
-        if (step * 1.2 < _up(step)) {
-            step = Math.round(step * 1.1);
-        } else {
-            step = _up(step);
-        }
-
-        max = min + step * amount;
         return {min, max};
+
+        min = _flat(min);
+        let mmax = min + _flat((max - min) / amount) * amount;
+        max = _up( max);
+        return {min, max};
+
+
+
+
+        // if (max > min * 2) {
+        //     min = 0;
+        // } else {
+        //     min = _down(min);
+        // }
+
+        // // max *= 1.05;
+
+        // let step = (max - min) / amount;
+        // if (step * 1.2 < _up(step)) {
+        //     step = Math.round(step * 1.1);
+        // } else {
+        //     step = _up(step);
+        // }
+
+        // max = min + step * amount;
+        // return {min, max};
     }
 
 
-    getMinMax(data){
+    getMinMax(fullWidth = false) {
+        let length = this.$data.labels.length - 1;
+        let $state = this.$state;
+        let $componentState = this.$componentState;
+        let min = Infinity;
+        let max = -Infinity;
+        let from = $state.from;
+        let to = $state.to;
+        let mm;
+        let scaleYStartsFromZero = this.options.scaleYStartsFromZero;
+
+        if (fullWidth) {
+            from = 0;
+            to = length;
+        } else {
+            from = Math.max(from - 2, 0);
+            to = Math.min(to + 2, length);
+        }
+
+        this.$data.datasets.forEach(dataset => {
+            if (!dataset.hidden) {
+                let values = dataset.values.slice(from, to);
+                values = this.dataCompression(values, this.width * this.pixelRatio, 'maximizing');
+                mm = Object.assign({}, this.calcMinMax(values));
+                min = Math.min(mm.min, min);
+                max = Math.max(mm.max, max);
+            }
+        });
+
+        if (this.$data.stacked) {
+            let values = this.$data.sumValues.slice(from, to);
+            max = Math.max(this.calcMinMax(values).max, max);
+        }
+        // max = max === -Infinity ? 0 : max;
+        // min = min === Infinity ? 0 : min;
+        max = scaleYStartsFromZero ? max * 1.2 : max;
+        min = scaleYStartsFromZero ? 0 : min;
+        return {max, min};
+    }
+
+    calcMinMax(data){
         if (!data) {
             return false;
         }
@@ -309,39 +362,79 @@ export class abstractComponent {
 
 
 
-
-    checkEvent(e, eventName) {
+    event(e, eventName, external) {
+        
+        if (!e.path) {
+            let target = e.target;
+            e.path = [target];
+            while (target = target.parentNode) {
+                e.path.push(target);
+            }
+        }
+        let onEventName = 'on' + eventName;
         let ignoreTarget = !['Mousedown', 'Touchstart'].includes(eventName);
         if (!ignoreTarget && e.path && !e.path.includes(this.component)) {
-            return {x: false, y: false};
+            return this[onEventName](e, false, false);
         }
 
         let ignoreCoordinates = ['Mouseup', 'Touchend'].includes(eventName);
         if (ignoreCoordinates) {
-            return {x: true, y: true};
+            return this[onEventName](e, true, true);
         }
-        let xy = Utils.getEventXY(e, this.component);
-        return {x: xy.x / this.width, y: xy.y / this.height};
+        let {x, y} = Utils.getEventXY(e, this.component);
+        
+
+        x /= this.width;
+        y /= this.height;
+
+        // if (external) {
+        //     this.options[onEventName] && this.options[onEventName].call(this, e, x, y);
+        // } else {
+            this[onEventName] && this[onEventName](e, x, y);
+        // }
+        // console.log('this.options[onEventName]', onEventName, this.options[onEventName]);
+        // external function:
     }
+
     registerEvents() {
         let t = this;
-
-        function event(e, eventName) {
-            let {x, y} = t.checkEvent(e, eventName);
-            if (x === false) return;
-            t['on' + eventName](x, y, e);
-        }
-
-        ['Mouseup', 'Touchend', 'Mousemove', 'Touchmove', 'Mousedown', 'Touchstart'].forEach(eventName => {
+        this.eventsList.forEach(eventName => {
             if (this['on' + eventName])
-                document.addEventListener(eventName.toLowerCase(), e => {event(e, eventName)}, true);
+                document.addEventListener(eventName.toLowerCase(), e => {
+                    t.event(e, eventName)
+                }, false);
+            // if (this.options['on' + eventName])
+            //     document.addEventListener(eventName.toLowerCase(), this.options['on' + eventName], true);
         });
+    }
+
+    removeEvents() {
+        let t = this;
+        this.eventsList.forEach(eventName => {
+            if (this['on' + eventName])
+                document.removeEventListener(eventName.toLowerCase(), e => {t.event(e, eventName)}, false);
+            // if (this.options['on' + eventName])
+            //     document.removeEventListener(eventName.toLowerCase(), this.options['on' + eventName], true);
+        });
+    }
+
+    destroy() {
+        let el = this.component;
+        this.removeEvents();
+        el.parentNode.removeChild(el);
     }
 
     /**
      * Events
      */
-    
+
+    onSetData() {
+        this.$data = this._chart.$data;
+        this.createDataElements();
+        this.prepareData();
+        this.createElements();
+        this.render(true);
+    }
 
     onScreenResize() {
         this.setSizes();

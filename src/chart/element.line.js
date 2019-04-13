@@ -26,10 +26,13 @@ export class Line extends abstractElement {
     }
 
     calculate() {
-        let start = this.$componentState.start || this.$state.start;
-        let end = this.$componentState.end || this.$state.end;
-        let min = this.$componentState.min;
-        let max = this.$componentState.max;
+
+        let $componentState = this.$componentState;
+        let start = $componentState.start || this.$state.start;
+        let end = $componentState.end || this.$state.end;
+        let min = $componentState.min;
+        let max = $componentState.max;
+        let fixedSize = $componentState.fixedSize;
 
         if (
             this.start === start && this.end === end &&
@@ -43,14 +46,21 @@ export class Line extends abstractElement {
         let length = values.length;
         let from = Math.floor(length * start);
         let to = Math.ceil(length * end);
-        let verticalRate = this.height / (max - min) || 1;
+        let offsetTop = this.top;
+        let height = this.height - offsetTop - this.bottom;
+        let verticalRate = height / (max - min) || 1;
+
+        if (!fixedSize) {
+            from--;
+            to++;
+        }
 
         let _posY = (value) => {
-            return this.height - value * verticalRate + this.top;
+            // console.log('height - value * verticalRate + offsetTo',height,value,verticalRate, height - value * verticalRate + offsetTop);
+            return height - (value - min) * verticalRate + offsetTop;
         };
 
         this.pointsY = [];
-        this.pointsX = [];
         for (let i = from; i < to; i++) {
             this.pointsY.push(_posY(values[i]));
         }
@@ -66,38 +76,47 @@ export class Line extends abstractElement {
         this.calculate();
 
         let _posX = point => {
-            return point * pointWidth + pointWidth/2 * 0 + this.left ;
+            point -= ignoreFirst
+            return offsetLeft + point * pointWidth;
         };
 
-        let _drawLine = i => {
+        let $componentState = this.$componentState;
+        let ctx = this.ctx;
+        let options = this.options;
+        let y, x;
+        let pointsY = this.pointsY;
+        let length = pointsY.length;
+
+        let ignoreFirst = +isNaN(pointsY[0]);
+        let ignoreLast = +isNaN(pointsY[length - 1]);
+        let offsetLeft = this.left * ignoreFirst;
+        let offsetRight = this.right * ignoreLast;
+
+        let pointWidth = (this.width - offsetLeft - offsetRight) / (length - ignoreLast - ignoreFirst);
+
+        pointWidth += pointWidth / (length - !ignoreLast - !ignoreFirst);
+
+        ctx.globalAlpha = $componentState.opacity;
+        
+        ctx.beginPath();
+
+        ctx.lineWidth = options.width;
+        ctx.strokeStyle = options.color;
+        ctx.lineJoin = 'bevel';
+        ctx.lineCap = 'butt';
+        // ctx.lineJoin = options.join;
+
+
+        let i = 0 + ignoreFirst;
+        y = pointsY[i];
+        x = _posX(i);
+        ctx.moveTo(x, y);
+
+        for (i; i < length - ignoreLast; i++) {
             y = this.pointsY[i];
             x = _posX(i);
             ctx.lineTo(x, y);
-            // debug
-            // ctx.fillText(i, x, y + 30);
-            // ctx.fillText(this.dataset.values[i], x, y + 60);
         }
-
-        let options = this.options;
-        let y, x;
-        let length = this.pointsY.length;
-
-        let pointWidth = this.width / (length - 1);
-        let ctx = this.ctx;
-
-
-        ctx.translate(0.5, 0.5);
-        ctx.beginPath();
-        ctx.lineWidth = options.width;
-        ctx.lineJoin = options.join;
-        ctx.strokeStyle = options.color;
-
-        let i = 0;
-        y = this.pointsY[i];
-        x = this.pointsX[i];
-        ctx.moveTo(x, y);
-
-        for (i; i < length; _drawLine(i++)) {}
 
         ctx.stroke();
 
@@ -114,9 +133,9 @@ export class Line extends abstractElement {
             ctx.fill();
             ctx.stroke();
         }
-
+// console.log('v', this.dataset);
         // debug
-        // if (this.dataset.name === 'y0') {
+        // if (this.dataset.index === 0) {
         //     let x = 50;
         //     let y = 1;
         //     ctx.textAlign = 'left';
@@ -124,12 +143,12 @@ export class Line extends abstractElement {
         //     ctx.fillStyle = '#333';
         //     ctx.fillText('length: ' + length, x, y++ * 30 + 100);
 
-        //     Object.keys(this.$state).forEach(key => {
-        //         ctx.fillText(key + ': ' + this.$state[key], x, y++ * 30 + 100);
+        //     Object.keys(this.$componentState).forEach(key => {
+        //         ctx.fillText(key + ': ' + this.$componentState[key], x, y++ * 30 + 100);
         //     });
         // }
 
-        ctx.stroke();
-        ctx.translate(-0.5, -0.5);
+        // ctx.stroke();
+        // ctx.translate(-0.5, -0.5);
     }
 }
