@@ -5,6 +5,8 @@ import { abstractElement } from './element.js';
 export class ScaleX extends abstractElement {
     constructor(params) {
         super(params);
+
+        // let cellWidth = ctx.measureText('33 qwe.').width * 1.5;
     }
 
 
@@ -12,63 +14,55 @@ export class ScaleX extends abstractElement {
         // if (!this.data) return;
 
         // this.init();
-
+        this.calcSizes();
         let _posX = point => {
-            return point * cellWidth  + offsetLeft;
+            return point * this.pointWidth  + offsetLeft - this.offsetX;
         };
 
         let _txt = n => {
             let label = labels[n];
-            return options.labelsFormat ? options.labelsFormat(label, this.$state.zoom) : label;
+            if (!label) return '';
+            return options.labelsFormat ? options.labelsFormat(label, $state.zoom) : label;
         };
 
+        let labels = this.$data.labels;
+        let offsets = this.getOffsets();
+        let offsetLeft = offsets.left;
+        let posY = this.height - offsets.bottom;
         let ctx = this.ctx;
         let options = this.options;
+        let $state = this.$state;
+        let $componentState = this.$componentState;
+
+
+        let from = $state.from;
+        let to = $state.to;
+        let amount = 5;
+        let step = Math.ceil((to - from) / amount + 1);
+        step = Math.max(1, step);
+
         ctx.font = options.fontsize * this.pixelRatio + 'px ' + options.fontname;
-
-// console.log('options', options);
-        // let offsetTop = this.top;
-        let offsetLeft = this.left;
-        let posY = this.height - this.bottom;
-        let width = this.width - offsetLeft - this.right;
-
-        let cellWidth = ctx.measureText('33 qwe.').width * 1.5;
-        let labels = this.$data.labels;
-        // console.log('labels', labels);
-        // let posY = offsetTop + height;
-        let length = labels.length;
-        let amount = Math.min(length, Math.floor(width / cellWidth));
-        let step = Math.floor(length / amount);
-
-        cellWidth = width / amount;
         ctx.textBaseline = options.baseline;
         ctx.fillStyle = options.color;
+        ctx.globalAlpha = $componentState.opacity;
 
-        // first label
-        ctx.textAlign = 'left';
-        ctx.fillText(_txt(0), _posX(0), posY);
-
-        // last label
-        ctx.textAlign = 'right';
-        ctx.fillText(_txt(length - 1), width, posY);
-
-        ctx.textAlign = options.align;
-
-        for (let i = 1; i < amount; i++) {
-            
-            let x = _posX(i);
-            let txt = _txt(i * step);
-            ctx.fillText(txt, x, posY);
+        let points = [];
+        for (var i = 0; i <= amount; i++) {
+            points.push(from + i * step);
         }
 
-        // ctx.stroke();
-        // let x = this.width - 10;
-        // let y = 1;
         // ctx.textAlign = 'right';
-        // ctx.font = '32px arial';
-        // ctx.fillText('length: ' + length, x, y++ * 30 + 100);
-        // ctx.fillText('amount: ' + amount, x, y++ * 30 + 100);
-        // ctx.fillText('step: ' + step, x, y++ * 30 + 100);
-        // ctx.fillText('cellWidth: ' + cellWidth, x, y++ * 30 + 100);
+        // i = points.pop();
+        // let x = _posX(i);
+        // let txt = _txt(i);
+        // ctx.fillText(txt, x, posY);
+        ctx.textAlign = 'center';
+        
+        points.forEach(i => {
+            let x = _posX(i);
+            let txt = _txt(i);
+            ctx.fillText(txt, x, posY);
+        });
+
     }
 }

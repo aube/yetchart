@@ -180,8 +180,6 @@ const Utils = {
     },
 
     getEventXY: function(e, el) {
-
-
         let offsets = el.getBoundingClientRect();
         let pos = e.targetTouches ? e.targetTouches[0] : e;
 

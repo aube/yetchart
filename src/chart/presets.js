@@ -20,25 +20,35 @@ export default {
                 Line: {
                     elementType: 'Line',
                     width: 5,
-                    join: 'round',
                     fillColor: '#fff',
                     zindex: 0,
-                    // offset: {
-                    //     left: 15,
-                    //     right: 15,
-                    // },
+                    offset: {
+                        left: 20,
+                        right: 20,
+                    }
                 },
                 Area: {
                     elementType: 'Area',
                     width: 5,
-                    join: 'round',
                     fillColor: '#fff',
                     zindex: 0,
+                    offset: {
+                        left: 20,
+                        right: 20,
+                    }
                 },
                 Bar: {
                     elementType: 'Bar',
                     width: 5,
-                    join: 'round',
+                    fillColor: '#fff',
+                    zindex: 0,
+                    offset: {
+                        left: 20,
+                        right: 20,
+                    }
+                },
+                Pie: {
+                    elementType: 'Pie',
                     fillColor: '#fff',
                     zindex: 0,
                 },
@@ -52,6 +62,10 @@ export default {
                     color: '#f2f4f5',
                     activeColor: '#dfe6eb',
                     zindex: -1,
+                    offset: {
+                        left: 20,
+                        right: 20,
+                    }
                 }, 
                 ScaleY: {
                     elementType: 'ScaleY',
@@ -61,6 +75,10 @@ export default {
                     fontname: 'Arial',
                     baseline: 'bottom',
                     zindex: 1,
+                    offset: {
+                        left: 20,
+                        right: 20,
+                    }
                 },
                 ScaleX: {
                     elementType: 'ScaleX',
@@ -71,21 +89,11 @@ export default {
                     align: 'center',
                     zindex: 1,
                     offset: {
-                        bottom: 80
+                        bottom: 80,
+                        left: 60,
+                        right: 160,
                     }
                 },
-                // Tooltip: {
-                //     elementType: 'Tooltip',
-                //     background: '#fff',
-                //     color: '#222',
-                //     bordercolor: '#aaa',
-                //     width: 2,
-                //     fontsizeValue: 14,
-                //     fontsizeName: 10,
-                //     fontsizeTitle: 12,
-                //     fontname: 'Arial',
-                //     zindex: 2,
-                // },
             },
         },
         Map: {
@@ -120,7 +128,12 @@ export default {
                     width: 3,
                     join: 'round',
                     color: 'tomato',
-                }
+                },
+                Pie: {
+                    elementType: 'Pie',
+                    fillColor: '#fff',
+                    zindex: 0,
+                },
             },
         },
         Scroll: {
@@ -162,7 +175,7 @@ export default {
                 width: '94%',
                 height: '10%',
                 top: '0',
-                left: '3%',
+                left: '20px',
             },
             type: 'html',
             template: `

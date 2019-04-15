@@ -3,26 +3,41 @@ body {
     background-color: #fff;
     transition: background-color .2s;
 }
+
 .night-mode {
     color: #fff;
     background-color: #242f3e;
 
-    .chart-scroll{
-        .chart-scroll-bar {
-            background: #1f2a38;
+    .yetchart-Header {
+        .chart-header {
+            color: #fff;
         }
-        .chart-scroll-carret {
-            border-color: #40566b;
+
+        .chart-header-state {
+            cursor: pointer;
+            color: #48AAF0;
         }
     }
-    .chart-legend-item {
-        border-color: #344658;
-        filter: opacity(80%) brightness(120%);
-        &.hidden {
-            .icon:after {
-                background: #242f3e;
-            }
+
+
+
+
+    .chart-scroll{
+        .chart-scroll-bar {
+            background: #304259;
         }
+        .chart-scroll-carret {
+            border-color: #56626D;
+            box-shadow: 0 0 1px 1px #333;
+        }
+    }
+    .chart-legend {
+        --hidden-color: #242f3e;
+    }
+    .chart-legend-item {
+        // border-color: #344658;
+        filter: opacity(80%) brightness(120%);
+        text-shadow: 0 0 1px #000, 0 0 2rem #777;
     }
     canvas {
         filter: opacity(80%)  brightness(120%);

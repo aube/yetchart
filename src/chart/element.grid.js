@@ -16,12 +16,14 @@ export class Grid extends abstractElement {
             return point * cellWidth  + offsetLeft;
         };
 // console.log('height', height);
+        let offsets = this.getOffsets();
         let ctx = this.ctx;
+        let $componentState = this.$componentState;
         let options = this.options;
-        let offsetTop = this.top;
-        let offsetLeft = this.left;
-        let height = this.height - offsetTop - this.bottom;
-        let width = this.width - offsetLeft - this.right;
+        let offsetTop = offsets.top;
+        let offsetLeft = offsets.left;
+        let height = this.height - offsetTop - offsets.bottom;
+        let width = this.width - offsetLeft - offsets.right;
         let cellHeidht = height / (options.horizontal);
         let cellWidth = width / (options.vertical - 1);
         let scaleYRate = this.scaleYRate || 1;
@@ -29,9 +31,7 @@ export class Grid extends abstractElement {
         ctx.beginPath();
         ctx.lineWidth = options.width;
         ctx.strokeStyle = options.color;
-
-        ctx.shadowColor = options.shadowColor || '';
-        ctx.shadowBlur = options.shadowBlur || 0;
+        ctx.globalAlpha = $componentState.opacity;
 
         for (let i = 0, ii = options.horizontal; i < ii; i++) {
             ctx.moveTo(offsetLeft, _posY(i));

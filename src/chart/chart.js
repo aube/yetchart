@@ -23,10 +23,6 @@ export default class Chart {
             start: .9,
             end: 1,
         };
-        // this.$state = {
-        //     start: .0,
-        //     end: .01,
-        // };
 
         this.$methods = {
             setAreaPosition: this.setAreaPosition.bind(this),
@@ -66,21 +62,27 @@ export default class Chart {
         });
     }
 
+    update() {
+        this.data = this.$data;
+    }
+
     createComponents() {
         // console.log('this.components', this.components);
         // (this.components || []).forEach(component => component.destroy1);
         this.components = [];
-        Object.keys(this._options).forEach(componentName => {
-            if (availableComponents[componentName]) {
+        Object.keys(this._options).forEach(this.createComponent.bind(this));
+    }
 
-                let options = this._options[componentName];
-                let inheritedOptions = this._options[options.inheritOptions] || {};
-                delete inheritedOptions.elements;
-                delete inheritedOptions.attrs;
-                options = Utils.objMerge({}, inheritedOptions, options);
-                this.components.push(new availableComponents[componentName](this, options));
-            }
-        });
+    createComponent(componentName) {
+        if (availableComponents[componentName]) {
+
+            let options = this._options[componentName];
+            let inheritedOptions = this._options[options.inheritOptions] || {};
+            delete inheritedOptions.elements;
+            delete inheritedOptions.attrs;
+            options = Utils.objMerge({}, inheritedOptions, options);
+            this.components.push(new availableComponents[componentName](this, options));
+        }
     }
 
     callComponents(methods) {
@@ -119,6 +121,7 @@ export default class Chart {
 
         $state.start = +_start.toFixed(3);
         $state.end = +_end.toFixed(3);
+        $state.shift = true;
 
         this.updateAreaSize();
     }
@@ -132,6 +135,8 @@ export default class Chart {
         } else {
             $state.end = +Math.max(Math.min(x, 1), $state.start + minimumSize).toFixed(3);
         }
+        $state.shift = false;
+        $state.reverse = type === 'start';
 
         this.updateAreaSize();
     }
@@ -172,14 +177,21 @@ export default class Chart {
     calcSumDatasetsValues() {
         let datasets = this.$data.datasets;
         let sumValues = [];
+        let prevDataset;
 
         for (let d = 0; d < datasets.length; d++) {
             if (datasets[d].hidden) continue;
+            datasets[d].values0 = [];
+            datasets[d].values1 = [];
             for (let v = 0; v < datasets[d].values.length; v++) {
                 sumValues[v] = (sumValues[v] || 0) + datasets[d].values[v];
+                datasets[d].values0[v] = prevDataset ? prevDataset.values1[v] : 0;
+                datasets[d].values1[v] = datasets[d].values[v] + datasets[d].values0[v];
             }
+            prevDataset = datasets[d];
         }
         this.$data.sumValues = sumValues;
+        this.$data.stackedValues = [];
     }
 
     zoomToggle() {
@@ -193,36 +205,29 @@ export default class Chart {
     }
 
     zoomInFn(ts = 1542326400000) {
-        this.callComponents(['beforeZoomIn']);
+        this.container.parentNode.classList.add('zoom');
         setTimeout(()=>{
             let opt = this._options;
             this._state = this.$state;
             this._data = this.$data;
-            
-            opt.zoomData(opt.zoomUrl, ts).then(data => {
-                this.$state = {
-                    start: 0,
-                    end: 1,
-                    zoom: true,
-                };
-                this.data = data;
-            });
+            try {
+                opt.zoomData(this, ts).then(data => {
+                    this.$state = {
+                        start: 0,
+                        end: 1,
+                        zoom: true,
+                    };
+                    this.data = data;
+                });
+            } catch(err) {}
         }, 200);
         setTimeout(()=>{
             this.callComponents(['onZoomIn']);
         }, 400);
-
-        // const Chart = this._chart;
-        // const url = this.options.zoomUrl + '2018-09/22.json';
-
-        // getJSON(url).then(result => {
-        //     Chart.$state.start = .4;
-        //     Chart.$state.end = .5;
-        //     Chart.data = dataConvertation(result);
-        // });
     }
 
     zoomOutFn(e) {
+        this.container.parentNode.classList.remove('zoom');
         this.$state = this._state;
         this.data = this._data;
     }

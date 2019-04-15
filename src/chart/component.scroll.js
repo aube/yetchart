@@ -6,7 +6,6 @@ export class Scroll extends abstractComponent {
 
     constructor(chart, options) {
         super(chart, options);
-        // this.name = 'Scroll';
 
         this.component.innerHTML = options.template;
         this.bars = this.component.getElementsByClassName('chart-scroll-bar');

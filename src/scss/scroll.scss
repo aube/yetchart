@@ -29,11 +29,12 @@
     .chart-scroll-carret {
         height: calc(100% - 4px);
         background: transparent;
-        border: 2px #c0d1e1 solid;
+        border: 2px #C0D1E1 solid;
         border-left-width: 14px;
         border-right-width: 14px;
         border-radius: var(--radius);
         position: absolute;
+        box-shadow: 0 0 1px 1px #fff;
         // z-index: 1;
         &:after, &:before {
             content: '';

@@ -13,17 +13,34 @@ export class abstractElement {
         this.setSizes();
     }
 
+    getOffsets() {
+        let $componentOffset = this.$componentOptions.offset || {};
+        let offset = this.options.offset || {};
+        let _value = key => ($componentOffset[key] || 0) + (offset[key] || 0);
+
+        return {
+            top: _value('top'),
+            bottom: _value('bottom'),
+            left: _value('left'),
+            right: _value('right'),
+        }
+    }
+
+    // calcSizes() {
+    //     let offsets = this.getOffsets();
+    //     let $state = this.$state;
+    //     let labels = this.$data.labels;
+    //     let width = this.width - offsets.left - offsets.right;
+    //     let fullWidth = width / ($state.end - $state.start);
+    //     this.offsetX = fullWidth * $state.start;
+    //     this.pointWidth = fullWidth / labels.length;
+    // }
+
     updateOptions(options) {
         this.options = Utils.objMerge(this.options, options, true);
     }
 
     setSizes() {
-        let offset = this.options.offset || {};
-        this.top = offset.top || 0;
-        this.bottom = offset.bottom || 0;
-        this.left = offset.left || 0;
-        this.right = offset.right || 0;
-
         this.width = parseInt(+this.canvas.getAttribute('width'));
         this.height = parseInt(+this.canvas.getAttribute('height'));
         this.pixelRatio = parseInt(+this.canvas.getAttribute('ratio'));
@@ -109,87 +126,129 @@ export class abstractElement {
     }
 
 
-    calculateStakedAndPercentage() {
-        let _posY = value => {
-            if (percentage)
-                return height - height * value + offsetTop;
+    checkSelection(x, y) {
+        let activePoint = Math.round((this.offsetX + x) / this.pointWidth) - 1;
+        let title = this.$data.labels[activePoint];
+        let content = [];
 
+        this.$data.datasets.forEach(ds => {
+            content.push({
+                index: ds.index,
+                hidden: ds.hidden,
+                name: ds.name,
+                color: ds.options.color,
+                value: ds.values[activePoint]
+            })
+        });
+
+        return {
+            title,
+            content,
+            activePoint,
+        }
+    }
+
+    calcSizes() {
+        let offsets = this.getOffsets();
+        let $state = this.$state;
+        let width = this.width - offsets.left - offsets.right;
+        let fixedSize = this.$componentState.fixedSize;
+        if (fixedSize) {
+            this.offsetX = 0;
+            this.pointWidth = width / $state.length;
+            return;
+        }
+        let fullWidth = width / ($state.end - $state.start);
+        this.offsetX = fullWidth * $state.start;
+        this.pointWidth = fullWidth / $state.length;
+    }
+
+    posX(point) {
+        let posX =  this.offsets.left + point * this.pointWidth - this.offsetX;
+        return posX;
+    };
+
+    calculatePosY(stacked, percentage) {
+        let _posY = value => {
             return height - (value - min) * verticalRate + offsetTop;
         };
+        let _posYpercentage = value => {
+            return height - height * value + offsetTop;
+        };
 
+        let offsets = this.getOffsets();
         let $state = this.$state;
         let $componentState = this.$componentState;
-        let start = $componentState.start || $state.start;
-        let end = $componentState.end || $state.end;
         let min = $componentState.min;
         let max = $componentState.max;
         let fixedSize = $componentState.fixedSize;
 
         let $data = this.$data;
-        let $datasets = $data.datasets;
         let sumValues = $data.sumValues;
-        let percentage = $data.percentage;
-        let dataset = this.dataset;
-        let $componentName = this.$componentName;
-        dataset[$componentName] = dataset[$componentName] || {};
-        let datasetScope = dataset[$componentName];
-        let values = dataset.values;
-        let length = values.length;
-        let from = Math.floor(length * start);
-        let to = Math.ceil(length * end);
+        let values = this.dataset.values;
+        let values0 = this.dataset.values0;
+        let values1 = this.dataset.values1;
+        let from = $state.from;
+        let to = $state.to;
 
-        // ignore for maps
-        if (!fixedSize) {
-            from--;
-            to++;
+        if (fixedSize) {
+            from = 0;
+            to = $state.length - 1;
+        } else {
+            from -= 4;
+            to += 4;
         }
-
-        let offsetTop = this.top;
-        let height = this.height - offsetTop - this.bottom;
+        let offsetTop = offsets.top;
+        let height = this.height - offsetTop - offsets.bottom;
         let verticalRate = height / (max - min) || 1;
 
-        datasetScope.pointsY0 = [];
-        datasetScope.pointsY1 = [];
-        datasetScope.stackedValues = Array(to - from);
-        if ($state.visiblesDatasets === 1) {
-            datasetScope.stackedValues.fill($componentState.min);
-        } else {
-            datasetScope.stackedValues.fill(0);
-        }
+        // let pointsY0 = [];
+        let pointsY0 = [];
+        let pointsY1 = [];
 
+        for (let i = from; i <= to; i++) {
+            if (percentage && stacked) {
+                pointsY0.push({
+                    n: i,
+                    v: _posYpercentage(values0[i] / sumValues[i])
+                });
+                pointsY1.push({
+                    n: i,
+                    v: _posYpercentage(values1[i] / sumValues[i])
+                });
+            } else if (stacked) {
+                pointsY0.push({
+                    n: i,
+                    v: _posY(values0[i])
+                });
+                pointsY1.push({
+                    n: i,
+                    v: _posY(values1[i])
+                });
+                // pointsY1.push(_posY(values1[i]));
+            } else {
 
-        let pointsY0 = datasetScope.pointsY0;
-        let pointsY1 = datasetScope.pointsY1;
-        let stackedValues = datasetScope.stackedValues;
-        let prevDataset = false;
-
-        $datasets.forEach(ds => {
-            if (!ds.hidden) {
-                if (ds.index < dataset.index) {
-                    prevDataset = ds;
-                }
+                pointsY0.push({
+                    n: i,
+                    v: _posY(values[i])
+                });
             }
-        });
-
-        for (let i = from, c = 0; i <= to; i++) {
-            if (prevDataset) {
-                stackedValues[c] += prevDataset[$componentName].stackedValues[c];
-            }
-
-            let y0, y1;
-
-            y0 = percentage ? _posY(stackedValues[c] / sumValues[i]) : _posY(stackedValues[c]);
-            
-            stackedValues[c] += values[i];
-            
-            y1 = percentage ? _posY(stackedValues[c] / sumValues[i]) : _posY(stackedValues[c]);
-
-            y0 = isNaN(y1) ? y1 : y0;
-            pointsY0.push(y0);
-            pointsY1.push(y1);
-            c++;
         }
+        // for (let i = from; i <= to; i++) {
+        //     if (percentage) {
+        //         pointsY0.push({
+        //             point: i,
+        //             value: _posYpercentage(values0[i] / sumValues[i])
+        //         });
+        //         pointsY1.push(_posYpercentage(values1[i] / sumValues[i]));
+        //     } else {
+        //         pointsY0.push(_posY(values0[i]));
+        //         pointsY1.push(_posY(values1[i]));
+        //     }
+        // }
+
+        this.pointsY0 = pointsY0;
+        this.pointsY1 = pointsY1;
     }
-
 
 }

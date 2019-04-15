@@ -6,74 +6,46 @@ export class Area extends abstractElement {
         super(params);
     }
 
-    getMinMax(data){
-        if (!data) {
-            return false;
-        }
-
-        let min = Infinity,
-            max = -Infinity;
-
-        for (let i = data.length - 1; i >= 0; i--) {
-            min = Math.min(min, +data[i]);
-            max = Math.max(max, +data[i]);
-        }
-
-        return {
-            min,
-            max
-        };
-    }
-
     draw() {
         if (!this.dataset || this.dataset.hidden) return;
-        this.calculateStakedAndPercentage();
+        this.calculatePosY(this.$data.stacked, this.$data.percentage);
 
-        let _posX = point => {
-            point -= ignoreFirst
-            return offsetLeft + point * pointWidth;
-        };
-
+        this.offsets = this.getOffsets();
+        this.calcSizes();
+        
         let options = this.options;
+        let $componentState = this.$componentState;
         let ctx = this.ctx;
         let y, x, t;
-        let pointsY0 = this.dataset[this.$componentName].pointsY0;
-        let pointsY1 = this.dataset[this.$componentName].pointsY1;
-        let length = pointsY0.length;
-
-        let ignoreFirst = +isNaN(pointsY0[0]);
-        let ignoreLast = +isNaN(pointsY0[length - 1]);
-        let offsetLeft = this.left * ignoreFirst;
-        let offsetRight = this.right * ignoreLast;
-
-        let pointWidth = (this.width - offsetLeft - offsetRight) / (length - ignoreLast - ignoreFirst);
-
-        pointWidth += pointWidth / (length - !ignoreLast - !ignoreFirst);
+        let pointsY0 = this.pointsY0;
+        let pointsY1 = this.pointsY1;
 
         ctx.lineWidth = options.width;
         ctx.lineJoin = options.join;
         ctx.strokeStyle = options.color;
         ctx.fillStyle = options.color;
+        ctx.globalAlpha = $componentState.opacity;
 
-        let i = 0 + ignoreFirst;
-        let firstY = pointsY0[i];
-        let firstX = _posX(i);
+        let firstY = pointsY0[0].v;
+        let firstX = this.posX(pointsY0[0].n);
         ctx.beginPath();
         ctx.moveTo(firstX, firstY);
 
-        for (i; i < length - ignoreLast; i++) {
-            y = pointsY0[i];
-            x = _posX(i);
+        for (let i = 0; i < pointsY0.length; i++) {
+            let point0 = pointsY0[i];
+            x = this.posX(point0.n);
+            y = point0.v;
             ctx.lineTo(x, y);
         }
 
-        for (i = length - 1 - ignoreLast; i >= 0 + ignoreFirst; i--) {
-            y = pointsY1[i];
-            x = _posX(i);
+        for (let i = pointsY1.length - 1; i >= 0; i--) {
+            let point1 = pointsY1[i];
+            x = this.posX(point1.n);
+            y = point1.v;
             ctx.lineTo(x, y);
         }
+
         ctx.closePath();
-        // ctx.lineTo(firstX, firstY);
         ctx.fill();
         ctx.stroke();
 
@@ -92,7 +64,6 @@ export class Area extends abstractElement {
         //     });
         // }
 
-        ctx.stroke();
         // ctx.translate(-0.5, -0.5);
     }
 }

@@ -1,7 +1,14 @@
+
 .chart-legend {
     width: 100%;
     margin: 2rem 0;
     --hidden-color: #fff;
+    -webkit-touch-callout: none; /* iOS Safari */
+    -webkit-user-select: none; /* Safari */
+    -khtml-user-select: none; /* Konqueror HTML */
+    -moz-user-select: none; /* Firefox */
+    -ms-user-select: none; /* Internet Explorer/Edge */
+    user-select: none; /* Non-prefixed version, currently*/
 
     .chart-legend-item {
         margin: 0 .3rem .5rem 0;
@@ -21,7 +28,7 @@
         .text {
             margin-left: 1rem;
             padding: .2rem .6rem;
-            color: var(--hidden-color);
+            color: #fff;
         }
 
         .icon {
@@ -42,7 +49,7 @@
             height: .6rem;
             margin-top: .3rem;
             margin-left: .5rem;
-            border: solid var(--hidden-color);
+            border: solid #fff;
             border-width: 0 .15rem .15rem 0;
             -webkit-transform: rotate(45deg);
             -ms-transform: rotate(45deg);

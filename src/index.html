@@ -41,13 +41,9 @@
             objMerge(settings, chartSettings.day);
             settings.element = graphContainer;
 
-            // if (chartSettings.zoom) {
-            //     settings.zoomFn = zoom;
-            // }
-            
             let Chart = new $Chart(settings);
 
-            getJSON(chartSettings.data).then(result => {
+            getJSON(settings.dataPath + 'overview.json').then(result => {
                 Chart.data = dataConvertation(result);
                 activeCharts.push(Chart);
             });
