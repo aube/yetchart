@@ -1,6 +1,7 @@
 .yetchart-Tooltip {
     display: none;
     position: absolute;
+    transition: left .1s;
 
     .chart-tooltip {
         background: #fff;
@@ -8,11 +9,23 @@
         border-radius: 15px;
         padding: 10px 15px;
         box-shadow: 0 1px 5px #aaa;
+        color: #000;
 
         .chart-tooltip-title {
-            color: #000;
             white-space: nowrap;
             margin: 0 0 10px;
+            &:after {
+                content: '';
+                position: absolute;
+                top: 17px;
+                right: 20px;
+                color: #D2D5D7;
+                display: inline-block;
+                border-right: 3px solid #D2D5D7;
+                border-bottom: 3px solid #D2D5D7;
+                width: 10px; height: 10px;
+                transform: rotate(-45deg);
+            }
         }
 
         .chart-tooltip-item {
@@ -41,5 +54,12 @@
 
     &.active {
         display: block;
+    }
+}
+
+
+.chart.zoom {
+    .chart-tooltip-title:after {
+        display: none;
     }
 }

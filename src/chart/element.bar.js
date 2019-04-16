@@ -57,7 +57,9 @@ export class Bar extends abstractElement {
         let pointsY1 = this.pointsY1;
         let length = $state.length;
 
+        let activePoint = $state.activeData ? $state.activeData.activePoint: false;
         let color = this.options.color;
+        
         ctx.beginPath();
         ctx.lineWidth = 1;
         ctx.strokeStyle = color;
@@ -70,11 +72,33 @@ export class Bar extends abstractElement {
             x = this.posX(point0.n);
 
             let h = point1 && point1.v ? point1.v - point0.v : point0.v;
+
+            if (activePoint !== false && point0.n !== activePoint) {
+                ctx.globalAlpha = 0.5;
+            }
+
             ctx.fillRect(x, point0.v, this.pointWidth, h);
             ctx.strokeRect(x, point0.v, this.pointWidth, h);
+
+            if (activePoint !== false && point0.n !== activePoint) {
+                ctx.globalAlpha = 1;
+            }
         }
 
 
+        // Active point
+        // if (.$state.activeData) {
+        //     let from = $state.from;
+        //     let activePoint = activeData.activePoint + 4;
+        //     let point0 = this.pointsY0[activePoint - from];
+        //     x = this.posX(point0.n);
+        //     ctx.lineWidth = 1;
+        //     ctx.strokeStyle = '#ffffff3c';
+        //     ctx.beginPath();
+        //     ctx.moveTo(x, this.offsets.top);
+        //     ctx.lineTo(x, this.height - this.offsets.bottom);
+        //     ctx.stroke();
+        // }
         // debug
         // if (this.dataset.index === 0) {
         //     let x = 50;

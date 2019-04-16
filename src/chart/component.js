@@ -68,7 +68,6 @@ export class abstractComponent {
         this.$methods.setAreaSize(x, mode);
     }
 
-
     updateOptions(options = {}) {
         this.$componentOptions = Utils.objMerge({}, this.$componentOptions, options, true);
 
@@ -103,6 +102,22 @@ export class abstractComponent {
         this.callElements(['setSizes']);
     }
 
+    setActivePoint(x, y) {
+        if (!x) {
+            this.$methods.setActivePoint(x, y, false);
+            return;
+        }
+        if (this._activeX === x) return;
+        this._activeX = x;
+
+        this.elements.forEach(element => {
+            if (element.dataset && element.checkSelection) {
+                let data = element.checkSelection(x * this.width, y * this.height);
+                this.$methods.setActivePoint(x, y, data);
+            }
+        });
+    }
+
     cleanup() {
         this.$data.stackedValues = []
         if (!this.canvas) {
@@ -118,7 +133,6 @@ export class abstractComponent {
     render() {
         this.cleanup();
         this.callElements(['draw']);
-        // requestAnimationFrame(this.render.bind(this));
     }
 
     createDataElement(dataset) {
@@ -426,10 +440,10 @@ export class abstractComponent {
             return this[onEventName](e, true, true);
         }
         let {x, y} = Utils.getEventXY(e, this.component);
-        
+        let $state = this.$state;
 
-        x /= this.width / this.pixelRatio;
-        y /= this.height / this.pixelRatio;
+        x /= $state.width ;
+        y /= $state.height ;
 
         this[onEventName] && this[onEventName](e, x, y);
     }
@@ -489,10 +503,6 @@ export class abstractComponent {
     onSetData() {
         this.$data = this._chart.$data;
         this.createDataElements(this.$data.datasets);
-        if (this.$data.zoomData) {
-            this.createDataElements(this.$data.zoomData.datasets);
-        }
-        
         this.prepareData();
         this.createElements();
         this.render(true);

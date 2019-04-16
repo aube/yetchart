@@ -32,7 +32,7 @@ function ts2dateTooltip(ts) {
 
 function ts2time(ts) {
     let dt = new Date(ts);
-    return ('0' + dt.getHours()).substr(-2) + ':' + ('0' + dt.getMinutes()).substr(-2);
+    return dt.getHours().toString().padStart(2, '0') + ':' + dt.getMinutes().toString().padStart(2, '0');
 }
 
 

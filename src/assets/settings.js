@@ -1,14 +1,44 @@
-const zoomData = (chart, ts) => {
-    // console.log('thiss', chart);
-    let dt = new Date(ts);
-    url += dt.getFullYear() + '-' + dt.getMonth() + '/' + dt.getDate() + '.json';
-    return getJSON(url).then(dataConvertation);
+const zoomDataIn = (chart) => {
+    if (chart.zoom) return;
+    let dt = new Date(chart.$state.currentTS);
+    let url = chart._options.dataPath;
+
+    url += dt.getFullYear() + '-'
+        + (dt.getMonth() + 1).toString().padStart(2, '0') + '/'
+        + dt.getDate().toString().padStart(2, '0') + '.json';
+
+    chart.zoom = true;
+    chart._state = chart.$state;
+    chart._data = chart.$data;
+    
+    return getJSON(url)
+        .then(dataConvertation)
+        .then(data => {
+            chart.$state = {
+                start: .4,
+                end: .6,
+                zoom: true,
+            };
+            chart.data = data;
+            chart.callComponents(['onZoomIn']);
+        });
+
 }
-const zoomDataPie = (chart, ts) => {
-    chart.forceDataElements = chart.forceDataElements === 'Pie' ? '' : 'Pie';
-    console.log('chart.forceDataElements', chart.forceDataElements);
+
+
+const zoomDataOut = (chart) => {
+    chart.zoom = false;
+    chart.$state = chart._state;
+    chart.data = chart._data;
+}
+
+
+const zoomPie = (chart) => {
+    chart.forceDataElements = chart.$state.zoom ? '' : 'Pie';
+    chart.$state.zoom = !chart.$state.zoom;
     chart.update();
 }
+
 const labelsFormat = (ts, time) => {
     return time ? ts2time(ts) : ts2date(ts);
 }
@@ -20,7 +50,8 @@ const titleFormat = (ts, time) => {
 const chart1 = {
     default: {
         dataPath: 'assets/data/1/',
-        zoomData,
+        zoomIn: zoomDataIn,
+        zoomOut: zoomDataOut,
         Graph: {
             elements: {
                 ScaleX: {
@@ -99,7 +130,8 @@ const chart1 = {
 const chart2 = {
     default: {
         dataPath: 'assets/data/2/',
-        zoomData,
+        zoomIn: zoomDataIn,
+        zoomOut: zoomDataOut,
         Graph: {
             elements: {
                 ScaleX: {
@@ -174,7 +206,8 @@ const chart2 = {
 const chart3 = {
     default: {
         dataPath: 'assets/data/3/',
-        zoomData,
+        zoomIn: zoomDataIn,
+        zoomOut: zoomDataOut,
         Graph: {
             elements: {
                 ScaleX: {
@@ -249,7 +282,8 @@ const chart3 = {
 const chart4 = {
     default: {
         dataPath: 'assets/data/4/',
-        zoomData,
+        zoomIn: zoomDataIn,
+        zoomOut: zoomDataOut,
         Graph: {
             scaleYStartsFromZero: true,
             destroyAni: 300,
@@ -332,7 +366,8 @@ const chart4 = {
 const chart5 = {
     default: {
         dataPath: 'assets/data/5/',
-        zoomData: zoomDataPie,
+        zoomIn: zoomPie,
+        zoomOut: zoomPie,
         Graph: {
             elements: {
                 ScaleX: {

@@ -42,9 +42,22 @@ $chart-controls-height: 2rem;
 body {
     margin: 0 auto;
     max-width: 56em;
-    padding: 1em 0;
+    padding: 0 0 1em 0;
     font-family: arial;
     -webkit-tap-highlight-color: transparent;
+}
+
+.header {
+    border-bottom: solid 1px;
+    border-color: #aaa;
+    font-size: 0.8rem;
+    line-height: 1rem;
+    padding: .5rem 0 .5rem 3rem;
+    margin-bottom: 2rem;
+    p {
+        margin: .2rem 0;
+        padding: 0;
+    }
 }
 
 .content {

@@ -66,21 +66,22 @@ export class Line extends abstractElement {
         ctx.stroke();
 
         // Active point
-        // let activeData = this.$state.activeData;
-        // if (activeData) {
-        //     let activePoint = activeData.activePoint + 1;
-        //     let correction = activeData.correction;
-        //     let radius = 10;
+        let activeData = this.$state.activeData;
+        if (activeData) {
+            let from = $state.from;
+            let activePoint = activeData.activePoint + 4;
+            let radius = 10;
+            let point0 = this.pointsY0[activePoint - from];
 
-        //     y = this.pointsY[activePoint - from];
-        //     x = _posX(activePoint - from );
+            y = point0.v;
+            x = this.posX(point0.n);
 
-        //     ctx.beginPath();
-        //     ctx.arc(x, y, radius, 0, 2 * Math.PI, false);
-        //     ctx.fillStyle = options.fillColor;
-        //     ctx.fill();
-        //     ctx.stroke();
-        // }
+            ctx.beginPath();
+            ctx.arc(x, y, radius, 0, 2 * Math.PI, false);
+            ctx.fillStyle = options.fillColor;
+            ctx.fill();
+            ctx.stroke();
+        }
 
         // debug
         // if (this.dataset.index === 0) {

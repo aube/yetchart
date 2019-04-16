@@ -46,24 +46,6 @@ export class Graph extends abstractComponent {
 
     }
 
-    setActivePoint(x, y) {
-        if (!x) {
-            this.$methods.setActivePoint(x, y, false);
-            // this.activeData = false;
-            return;
-        }
-        if (this._activeX === x) return;
-        this._activeX = x;
-
-        this.elements.forEach(element => {
-            if (element.dataset && element.checkSelection) {
-                let data = element.checkSelection(x * this.width, y * this.height);
-                this.$methods.setActivePoint(x, y, data);
-            }
-        });
-
-    }
-
 
     /**
      * Events
@@ -71,6 +53,7 @@ export class Graph extends abstractComponent {
     onUpdatePosition() {
         this.prepareData();
         super.render();
+        // requestAnimationFrame(super.render.bind(this));
     }
 
     onToggleDataset() {

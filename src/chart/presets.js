@@ -187,7 +187,7 @@ export default {
         },
         Tooltip: {
             style: {
-                top: '10%',
+                top: '1%',
             },
             type: 'html',
             template: `

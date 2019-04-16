@@ -49,6 +49,21 @@ export class Area extends abstractElement {
         ctx.fill();
         ctx.stroke();
 
+        let $state = this.$state;
+        // Active point
+        let activeData = this.$state.activeData;
+        if (activeData) {
+            let from = $state.from;
+            let activePoint = activeData.activePoint + 4;
+            let point0 = this.pointsY0[activePoint - from];
+            x = this.posX(point0.n);
+            ctx.lineWidth = 1;
+            ctx.strokeStyle = '#ffffff3c';
+            ctx.beginPath();
+            ctx.moveTo(x, this.offsets.top);
+            ctx.lineTo(x, this.height - this.offsets.bottom);
+            ctx.stroke();
+        }
 
         // debug
         // if (this.dataset.name === 'y0') {

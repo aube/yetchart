@@ -26,16 +26,6 @@ export class abstractElement {
         }
     }
 
-    // calcSizes() {
-    //     let offsets = this.getOffsets();
-    //     let $state = this.$state;
-    //     let labels = this.$data.labels;
-    //     let width = this.width - offsets.left - offsets.right;
-    //     let fullWidth = width / ($state.end - $state.start);
-    //     this.offsetX = fullWidth * $state.start;
-    //     this.pointWidth = fullWidth / labels.length;
-    // }
-
     updateOptions(options) {
         this.options = Utils.objMerge(this.options, options, true);
     }
@@ -78,11 +68,6 @@ export class abstractElement {
 
             let base = Utils.objMerge({}, newData, this.data);
             let delta = Utils.objDelta(this.data, newData);
-            // console.log('rev', this.data);
-            // console.log('rev',base);
-            // delta.pointWidth = -delta.pointWidth;
-            // console.log('pointWidth', base.pointWidth, delta.pointWidth);
-
             if (newData.resize) {
                 base.values = newData.values;
             } else {
@@ -96,22 +81,6 @@ export class abstractElement {
                     base.values = this.data.values.slice(0, newData.values.length);
                 }
             }
-            // base.
-            // base.values.fill(0);
-            // if (delta.values.length != this.data.values.length) {
-                
-            
-            //     if (data.reverse) {
-            //         this.data.values.unshift([...])
-            //     }
-            //     base = Utils.objMerge(base, this.data);
-            //     // console.log('db', delta.values.length, base.values.length);
-            // }
-            
-            // console.log('13323', data, delta, base);
-            // return new Promise((resolve) => {
-            //     this.ani(base, delta, 600, resolve);
-            // });
             this.ani(base, delta, 200);
             return 200;
         }
@@ -234,18 +203,6 @@ export class abstractElement {
                 });
             }
         }
-        // for (let i = from; i <= to; i++) {
-        //     if (percentage) {
-        //         pointsY0.push({
-        //             point: i,
-        //             value: _posYpercentage(values0[i] / sumValues[i])
-        //         });
-        //         pointsY1.push(_posYpercentage(values1[i] / sumValues[i]));
-        //     } else {
-        //         pointsY0.push(_posY(values0[i]));
-        //         pointsY1.push(_posY(values1[i]));
-        //     }
-        // }
 
         this.pointsY0 = pointsY0;
         this.pointsY1 = pointsY1;

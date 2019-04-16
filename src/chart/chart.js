@@ -30,7 +30,9 @@ export default class Chart {
             setActivePoint: this.setActivePoint.bind(this),
             updateAreaSize: this.updateAreaSize.bind(this),
             toggleDataset: this.toggleDataset.bind(this),
-            zoomToggle: this.zoomToggle.bind(this),
+            // zoomToggle: this.zoomToggle.bind(this),
+            zoomOut: this.zoomOutFn.bind(this),
+            zoomIn: this.zoomInFn.bind(this),
         };
 
         this.setContainer(options && options.element);
@@ -39,17 +41,13 @@ export default class Chart {
     }
 
     set data(data) {
+        this.$data = data;
+
         let $state = this.$state;
         $state.length = data.labels.length;
         $state.from = Math.ceil($state.start * ($state.length - 1));
         $state.to = Math.floor($state.end * ($state.length - 1));
-
-        this.$data = data;
-        this.callComponents(['destroy']);
-        this.createComponents();
-        this.calcVisibleDatasetsAmount();
-        this.calcSumDatasetsValues();
-        this.callComponents(['onSetData']);
+        this.update();
     }
 
     set options(options) {
@@ -63,7 +61,11 @@ export default class Chart {
     }
 
     update() {
-        this.data = this.$data;
+        this.callComponents(['destroy']);
+        this.createComponents();
+        this.calcVisibleDatasetsAmount();
+        this.calcSumDatasetsValues();
+        this.callComponents(['onSetData']);
     }
 
     createComponents() {
@@ -143,17 +145,24 @@ export default class Chart {
 
     updateAreaSize() {
         let $state = this.$state;
-        $state.from = Math.ceil($state.start * ($state.length - 1));
-        $state.to = Math.floor($state.end * ($state.length - 1));
-        this.callComponents(['onUpdatePosition']);
+        let from = Math.ceil($state.start * ($state.length - 1));
+        let to = Math.floor($state.end * ($state.length - 1));
+        if ($state.from !== from || $state.to !== to) {
+            $state.from = from;
+            $state.to = to;
+            this.callComponents(['onUpdatePosition']);
+        }
     }
 
     setActivePoint(x, y, data) {
-
-        this.$state.activeX = x;
-        this.$state.activeY = y;
-        this.$state.activeData = data;
-
+        let $state = this.$state;
+        if ($state.activeData && $state.activeData.title === data.title) {
+            return;
+        }
+        $state.activeX = x;
+        $state.activeY = y;
+        $state.activeData = data;
+        $state.currentTS = data && data.title || $state.currentTS;
         this.callComponents(['onSetActivePoint']);
     }
 
@@ -194,42 +203,18 @@ export default class Chart {
         this.$data.stackedValues = [];
     }
 
-    zoomToggle() {
-        this.zoom = !this.zoom;
-        if (this.zoom) {
-            this.zoomInFn();
-        } else {
-            this.zoomOutFn();
-        }
-        // console.log('123', this._options);
-    }
-
-    zoomInFn(ts = 1542326400000) {
+    zoomInFn(e) {
         this.container.parentNode.classList.add('zoom');
-        setTimeout(()=>{
-            let opt = this._options;
-            this._state = this.$state;
-            this._data = this.$data;
-            try {
-                opt.zoomData(this, ts).then(data => {
-                    this.$state = {
-                        start: 0,
-                        end: 1,
-                        zoom: true,
-                    };
-                    this.data = data;
-                });
-            } catch(err) {}
-        }, 200);
-        setTimeout(()=>{
-            this.callComponents(['onZoomIn']);
-        }, 400);
+        if (this._options.zoomIn) {
+            this._options.zoomIn(this);
+        }
     }
 
     zoomOutFn(e) {
         this.container.parentNode.classList.remove('zoom');
-        this.$state = this._state;
-        this.data = this._data;
+        if (this._options.zoomOut) {
+            this._options.zoomOut(this);
+        }
     }
 
 

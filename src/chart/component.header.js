@@ -34,7 +34,8 @@ export class Header extends abstractComponent {
     }
 
     onClick(e) {
+        if (!this.$state.zoom) return;
         if (!e.path.includes(this.component)) return;
-            this.$methods.zoomToggle();
+            this.$methods.zoomOut();
     }
 }

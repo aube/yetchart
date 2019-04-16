@@ -45,9 +45,18 @@ export class Tooltip extends abstractComponent {
 
         this.title.innerText = _label(activeData.title);
         let tooltipWidth = this.div.offsetWidth / $state.width;
+        let tooltipHeight = this.div.offsetHeight / $state.height;
         let x = $state.activeX - tooltipWidth / 2;
+
         x = Math.max(0.02, x);
         x = Math.min(0.98 - tooltipWidth, x);
+        if (tooltipHeight > $state.activeY - .05) {
+            if ($state.activeX > .5) {
+                x = $state.activeX - tooltipWidth - 0.05;
+            } else {
+                x = $state.activeX + 0.05;
+            }
+        }
         this.div.style.left = x * 100 + '%';
 
         for (let i = 0; i < activeData.content.length; i++) {
@@ -70,10 +79,27 @@ export class Tooltip extends abstractComponent {
         this.render();
     }
 
-    onMousedown(e) {
-        if (this.$state.zoom) return;
-        if (!e.path.includes(this.div)) return;
-        this.$methods.zoomToggle();
+    // onMousedown(e) {
+    //     if (this.$state.zoom) return;
+    //     if (!e.path.includes(this.div)) return;
+    //     this.$methods.zoomIn();
+    // }
+ 
+    onZoomIn() {
+        // if (e.path && !e.path.includes(this.component)) {
+        //     return;
+        // }
     }
-    
+
+    onMousedown(e) {
+        // if (this.$state.zoom) return;
+        if (!e.path.includes(this.div)) return;
+        this.$methods.zoomIn();
+        this.setActivePoint(0, 0);
+    }
+
+    onTouchstart(e, x, y) {
+        this.onMousedown(e, x, y);
+        this.setActivePoint(0, 0);
+    }
 }

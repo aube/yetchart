@@ -19,9 +19,14 @@ body {
         }
     }
 
-
-
-
+    .yetchart-Tooltip {
+        .chart-tooltip {
+            background: #1c2533;
+            border: 1px solid #335;
+            box-shadow: 0 1px 5px #111;
+            color: #fff;
+        }
+    }
     .chart-scroll{
         .chart-scroll-bar {
             background: #304259;
