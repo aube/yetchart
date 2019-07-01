@@ -29,6 +29,7 @@ export class Line extends abstractElement {
             activePoint,
         }
     }
+    
     draw() {
         if (!this.dataset || this.dataset.hidden) return;
         this.calculatePosY();
@@ -47,7 +48,7 @@ export class Line extends abstractElement {
         ctx.globalAlpha = $componentState.opacity;
 
         ctx.beginPath();
-        ctx.lineWidth = options.width;
+        ctx.lineWidth = options.width * this.pixelRatio;
         ctx.strokeStyle = options.color;
         ctx.lineJoin = 'bevel';
         ctx.lineCap = 'butt';
@@ -70,8 +71,10 @@ export class Line extends abstractElement {
         if (activeData) {
             let from = $state.from;
             let activePoint = activeData.activePoint + 4;
-            let radius = 10;
+            let radius = options.activePointRadius * this.pixelRatio;
             let point0 = this.pointsY0[activePoint - from];
+
+            if (!point0) return;
 
             y = point0.v;
             x = this.posX(point0.n);

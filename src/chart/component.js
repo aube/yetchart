@@ -33,6 +33,7 @@ export class abstractComponent {
             this.canvas = parent.appendChild(document.createElement('CANVAS'));
             this.pixelRatio = this.getPixelRatio(this.canvas);
             this.ctx = this.canvas.getContext("2d");
+            this.ctx.translate(0.5, 0.5);
         }
 
         this.component = this.canvas || this.div;
@@ -56,7 +57,6 @@ export class abstractComponent {
         this.setSizes();
         this.registerEvents();
     }
-
 
     setAreaPosition(x, animate) {
         x = Math.max(Math.min(1, x), 0);
@@ -160,9 +160,7 @@ export class abstractComponent {
         }
     }
 
-
     createElements() {
-
         let elsTypes = this.$componentOptions.elementsTypes || {};
         let els = this.$componentOptions.elements;
 
@@ -212,7 +210,6 @@ export class abstractComponent {
         });
     }
 
-
     getPixelRatio(canvas){
         let ctx = canvas.getContext("2d");
         let dpr = window.devicePixelRatio || 1;
@@ -221,7 +218,6 @@ export class abstractComponent {
                   ctx.msBackingStorePixelRatio ||
                   ctx.oBackingStorePixelRatio ||
                   ctx.backingStorePixelRatio || 1;
-
         return dpr / bsr;
     }
 
@@ -421,7 +417,6 @@ export class abstractComponent {
 
 
     event(e, eventName, external) {
-        
         if (!e.path) {
             let target = e.target;
             e.path = [target];

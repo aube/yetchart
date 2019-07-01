@@ -110,7 +110,7 @@ export class Pie extends abstractElement {
                 txtY += txtRadius * Math.sin(avrgAngle);
             }
 
-            let fontSize = Math.round(32 + 32 * percent / 100);
+            let fontSize = Math.round(14 * this.pixelRatio + 30 * percent / 100);
 
             ctx.font = 'bold ' + fontSize + 'px arial';
             ctx.textBaseline = 'middle';

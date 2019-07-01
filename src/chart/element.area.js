@@ -16,7 +16,7 @@ export class Area extends abstractElement {
         let options = this.options;
         let $componentState = this.$componentState;
         let ctx = this.ctx;
-        let y, x, t;
+        let y, x;
         let pointsY0 = this.pointsY0;
         let pointsY1 = this.pointsY1;
 

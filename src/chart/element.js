@@ -9,6 +9,7 @@ export class abstractElement {
         this.ctx = ctx;
         this.hidden = false;
         this.name = component.name + ': ' + this.constructor.name;
+        this.pixelRatio = component.pixelRatio;
 
         this.setSizes();
     }
@@ -44,13 +45,9 @@ export class abstractElement {
             exec: (progress) => {
                 this.data = Utils.objSum(base, delta, progress);
                 this.data.reverse = true;
-                // console.log('this.data', this.data);
             },
             callback: () => {
-                // console.log(id, this.data.pointWidth, 'end');
-                // this.draw();
                 this._aniStop = false;
-                // console.log('callback exec', 'promise  resolve');
                 callback && callback();
             },
             context: this
@@ -134,15 +131,26 @@ export class abstractElement {
 
     posX(point) {
         let posX =  this.offsets.left + point * this.pointWidth - this.offsetX;
-        return posX;
+        if (isNaN(posX)) return NaN
+        // sharpen elements
+        posX = Math.round(posX * 2) / 2;
+        return ~~posX + .5;
     };
 
     calculatePosY(stacked, percentage) {
         let _posY = value => {
-            return height - (value - min) * verticalRate + offsetTop;
+            let posY = height - (value - min) * verticalRate + offsetTop;
+            if (isNaN(posY)) return NaN
+            // sharpen elements
+            posY = Math.round(posY * 2) / 2;
+            return ~~posY + .5;
         };
         let _posYpercentage = value => {
-            return height - height * value + offsetTop;
+            let posY = height - height * value + offsetTop;
+            if (isNaN(posY)) return NaN
+            // sharpen elements
+            posY = Math.round(posY * 2) / 2;
+            return ~~posY + .5;
         };
 
         let offsets = this.getOffsets();

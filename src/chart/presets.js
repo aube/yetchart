@@ -19,7 +19,8 @@ export default {
             elementsTypes: {
                 Line: {
                     elementType: 'Line',
-                    width: 5,
+                    width: 2,
+                    activePointRadius: 5,
                     fillColor: '#fff',
                     zindex: 0,
                     offset: {
@@ -58,9 +59,11 @@ export default {
                     elementType: 'Grid',
                     vertical: 0,
                     horizontal: 5,
-                    width: 2,
+                    width: 1,
                     color: '#f2f4f5',
+                    color: '#333333',
                     activeColor: '#dfe6eb',
+                    activeColor: '#333333',
                     zindex: -1,
                     offset: {
                         left: 20,
@@ -71,7 +74,7 @@ export default {
                     elementType: 'ScaleY',
                     labelsAmount: 5,
                     color: '#96a2aa',
-                    fontsize: 16,
+                    fontsize: 12,
                     fontname: 'Arial',
                     baseline: 'bottom',
                     zindex: 1,
@@ -83,7 +86,7 @@ export default {
                 ScaleX: {
                     elementType: 'ScaleX',
                     color: '#96a2aa',
-                    fontsize: 16,
+                    fontsize: 12,
                     fontname: 'Arial',
                     baseline: 'top',
                     align: 'center',
@@ -113,7 +116,7 @@ export default {
             elementsTypes: {
                 Line: {
                     elementType: 'Line',
-                    width: 3,
+                    width: 1,
                     join: 'round',
                     color: 'tomato',
                 },

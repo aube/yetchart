@@ -6,10 +6,8 @@ export class Bar extends abstractElement {
         super(params);
     }
 
-
     checkSelection(x, y) {
         let activePoint = Math.round((this.offsetX + x) / this.pointWidth) - 1;
-        // console.log('x', x, activePoint);
         let title = this.$data.labels[activePoint];
         let content;
         if (title) {
@@ -32,8 +30,6 @@ export class Bar extends abstractElement {
         }
     }
 
-
-
     draw() {
         if (!this.dataset || this.dataset.hidden) return;
         this.calculatePosY(true, this.$data.percentage);
@@ -47,15 +43,12 @@ export class Bar extends abstractElement {
         // }
 
         let $state = this.$state;
-        let from = $state.from;
-        let to = $state.to;
 
         let $componentState = this.$componentState;
         let ctx = this.ctx;
-        let y, x;
+        let x;
         let pointsY0 = this.pointsY0;
         let pointsY1 = this.pointsY1;
-        let length = $state.length;
 
         let activePoint = $state.activeData ? $state.activeData.activePoint: false;
         let color = this.options.color;
