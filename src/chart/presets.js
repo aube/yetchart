@@ -149,11 +149,14 @@ export default {
                 background: 'transparent',
             },
             template: `
-            <div class="chart-scroll">
-                <div class="chart-scroll-bar"></div>
-                <div class="chart-scroll-bar chart-scroll-bar-right"></div>
-                <div class="chart-scroll-carret"></div>
-            </div>`,
+                <div class="scrollbar">
+                    <div class="scrollbar__left"></div>
+                    <div class="scrollbar__carret">
+                        <div class="scrollbar__left-handle"></div>
+                        <div class="scrollbar__right-handle"></div>
+                    </div>
+                    <div class="scrollbar__right"></div>
+                </div>`,
         },
         Legend: {
             type: 'html',

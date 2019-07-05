@@ -187,14 +187,9 @@ const Utils = {
             console.log('e', e);
         }
 
-        // if (e.pageX || e.pageY) {
-        //     pos = e;
-        // } else if (e.targetTouches && e.targetTouches.length === 1){
-        //     pos = e.targetTouches[0];
-        // }
         return {
-            x: pos.pageX - offsets.left,
-            y: pos.clientY - offsets.top,
+            x: pos.clientX - offsets.left,
+            y: pos.clientY - offsets.top
         };
     },
 

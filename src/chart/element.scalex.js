@@ -16,7 +16,7 @@ export class ScaleX extends abstractElement {
         // this.init();
         this.calcSizes();
         let _posX = point => {
-            return point * this.pointWidth  + offsetLeft - this.offsetX;
+            return (point * this.pointWidth  + offsetLeft - this.offsetX) * this.pixelRatio;
         };
 
         let _txt = n => {

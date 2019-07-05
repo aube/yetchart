@@ -8,9 +8,10 @@ export class Scroll extends abstractComponent {
         super(chart, options);
 
         this.component.innerHTML = options.template;
-        this.bars = this.component.getElementsByClassName('chart-scroll-bar');
-        this.carret = this.component.querySelector('.chart-scroll-carret');
-        this.scroll = this.component.querySelector('.chart-scroll');
+        this.leftShift = this.component.querySelector('.scrollbar__left');
+        this.leftHandle = this.component.querySelector('.scrollbar__left-handle');
+        this.rightHandle = this.component.querySelector('.scrollbar__right-handle');
+        this.carret = this.component.querySelector('.scrollbar__carret');
     }
 
     _scrollMoveAni(x) {
@@ -30,11 +31,8 @@ export class Scroll extends abstractComponent {
     }
 
     render() {
-        let borderWidthCorrection = parseInt(getComputedStyle(this.carret)['border-left-width']);
         this.carret.style.width = this.end - this.start + '%';
-        this.carret.style.left = 'calc(' + this.start + '% - ' + borderWidthCorrection + 'px)';
-        this.bars[0].style.width = this.start + '%';
-        this.bars[1].style.width = 100 - this.end + '%';
+        this.leftShift.style.width = this.start + '%';
     }
 
     prepareData() {
@@ -58,22 +56,19 @@ export class Scroll extends abstractComponent {
 
     onMousedown(e, x, y) {
         if (!e.path.includes(this.component)) return;
-        this.drag = this.drag || 'click';
         this.clickX = x;
-        let accuracy = 0.05;
         let $state = this.$state;
-        let relAccuracy = ($state.end - $state.start) * accuracy * 2;
-        if ($state.start - accuracy <= x && $state.end + accuracy >= x) {
-            if ($state.start + relAccuracy >= x) {
-                this.drag = 'start';
-            } else if ($state.end - relAccuracy <= x) {
-                this.drag = 'end';
-            } else {
-                this.drag = 'shift';
-            }
+        this.deltaX = 0;
+        if (e.target === this.carret) {
+            this.drag = 'shift';
             this.deltaX = x - ($state.end + $state.start) / 2;
+        } else if (e.target === this.leftHandle) {
+            this.drag = 'start';
+        } else if (e.target === this.rightHandle) {
+            this.drag = 'end';
+        } else {
+            this.drag = 'click';
         }
-        // console.log('this.drag ', this.drag );
     }
 
     onMouseup(e) {
